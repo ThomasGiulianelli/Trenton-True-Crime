@@ -1,45 +1,59 @@
-var background;
-var startButton;
-var crimeBackground;
-var canvasWidth = 800;
-var canvasHeight = 600;
+var canvasWidth = 1152;
+var canvasHeight = 648;
 var sceneID = 0;
+var startBackground;
+var startButton;
+var startButtonWidth = .2*canvasWidth;
+var startButtonHeight = .2*canvasHeight;
+var startText;
+var crimeBackground;
 
 /* Gets called when page loads */
 function startGame() {
-  startButton = new component(315, 149, "assets/images/start_button.png", 250, 300, "image");
-  background = new component(canvasWidth, canvasHeight, "assets/images/start_screen_background.jpg", 0, 0, "image");
+  startButton = new component(startButtonWidth, startButtonHeight, "assets/images/start_button.png", canvasWidth/2 - startButtonWidth/2, canvasHeight/2 - startButtonHeight/2, "image");
+  startText = new component("50px", "Arial", "black", canvasWidth/3, canvasHeight/3, "text");
+  startText.text = "True Crime: Trenton";
+  startBackground = new component(canvasWidth, canvasHeight, "assets/images/start_screen_background.jpg", 0, 0, "image");
   crimeBackground = new component(canvasWidth, canvasHeight, "assets/images/crime_scene.png", 0, 0, "image");
   myGameArea.start();
 }
 
-/* Sets up the canvas */
+/* Converts document coordinates to coordinates relative to the canvas */
+function getMousePos(canvas, evt) {
+  var rect = canvas.getBoundingClientRect();
+  return {
+    x: evt.clientX - rect.left,
+    y: evt.clientY - rect.top
+  };
+}
+
 var myGameArea = {
   canvas : document.createElement("canvas"),
+  mousePos : false,
+  /* Sets up the canvas */
   start : function() {
     this.canvas.width = canvasWidth;
     this.canvas.height = canvasHeight;
     this.context = this.canvas.getContext("2d");
     document.body.insertBefore(this.canvas, document.body.childNodes[0]);
-    this.frameNo = 0;
-    this.interval = setInterval(updateGameArea, 20);
+    myGameArea.canvas.id = "canvas";
+    var canvasElements = document.getElementsByTagName("canvas"); //get the canvas element from the document after it's been created
+    this.interval = setInterval(updateGameArea, 20); //execute updateGameArea every 20 ms
     
     /* Event listeners for mouse clicks or touches */
-    window.addEventListener('mousedown', function (e) {
-      myGameArea.x = e.pageX;
-      myGameArea.y = e.pageY;
+    window.addEventListener('mousedown', function (evt) {
+      myGameArea.mousePos = getMousePos(document.getElementById("canvas"), evt);
     })
-    window.addEventListener('mouseup', function (e) {
-      myGameArea.x = false;
-      myGameArea.y = false;
+    window.addEventListener('mouseup', function (evt) {
+      myGameArea.mousePos.x = false;
+      myGameArea.mousePos.y = false;
     })
-    window.addEventListener('touchstart', function (e) {
-      myGameArea.x = e.pageX;
-      myGameArea.y = e.pageY;
+    window.addEventListener('touchstart', function (evt) {
+      myGameArea.mousePos = getMousePos(document.getElementById("canvas"), evt);
     })
-    window.addEventListener('touchend', function (e) {
-      myGameArea.x = false;
-      myGameArea.y = false;
+    window.addEventListener('touchend', function (evt) {
+      myGameArea.mousePos.x = false;
+      myGameArea.mousePos.y = false;
     })
   },
   clear : function() {
@@ -65,8 +79,12 @@ function component(width, height, color, x, y, type) {
   this.y = y; 
   this.update = function() {
     ctx = myGameArea.context;
-    if (type == "image") {
+    if (this.type == "image") {
       ctx.drawImage(this.image, this.x, this.y, this.width, this.height);
+    } else if (this.type == "text") {
+      ctx.font = this.width + " " + this.height;
+      ctx.fillStyle = color;
+      ctx.fillText(this.text, this.x, this.y);
     } else {
       ctx.fillStyle = color;
       ctx.fillRect(this.x, this.y, this.width, this.height);
@@ -83,8 +101,8 @@ function component(width, height, color, x, y, type) {
     var mytop = this.y;
     var mybottom = this.y + (this.height);
     var clicked = true;
-    if ((mybottom < myGameArea.y) || (mytop > myGameArea.y)
-     || (myright < myGameArea.x) || (myleft > myGameArea.x)) {
+    if ((mybottom < myGameArea.mousePos.y) || (mytop > myGameArea.mousePos.y)
+     || (myright < myGameArea.mousePos.x) || (myleft > myGameArea.mousePos.x)) {
         clicked = false;
     }
     return clicked;
@@ -95,21 +113,23 @@ function component(width, height, color, x, y, type) {
 function updateGameArea() { 
   myGameArea.clear(); //clear canvas before each frame
   
-  if (myGameArea.x && myGameArea.y) {
+  if (myGameArea.mousePos.x && myGameArea.mousePos.y) {
     if (startButton.clicked()) {
-      //hide title screen, show crime scene
-      console.log("clicked"); //TODO: button appears to be off-center (fix)
       sceneID = 1;
+      //hide title screen, show crime scene
+      //TODO: button appears to be off-center (fix)
     }
   }
+  
   switch (sceneID) {
     case 0: //start screen
-      background.newPos();
-      background.update();
+      startBackground.newPos();
+      startBackground.update();
       startButton.newPos();
       startButton.update();
+      startText.update();
       break;
-    case 1:
+    case 1: //crime scene
       crimeBackground.newPos();
       crimeBackground.update();
   }
