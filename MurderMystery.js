@@ -2,11 +2,13 @@ var canvasWidth = 1152;
 var canvasHeight = 648;
 var sceneID = 0;
 var nextScene = 0;
-var ga = 1.0; //global alpha
+var fadeAlpha = 0.0; // alpha value for fadeRect
 var fadingOut = false;
 var fadingIn = false;
+var fadeColor = "rgba(0,0,0,0)";
 
 /* game components */
+var fadeRect; //covers canvas and changes alpha to create fading effects
 var startBackground;
 var startButton;
 var startButtonWidth = .2*canvasWidth;
@@ -16,6 +18,7 @@ var crimeBackground;
 
 /* Gets called when page loads */
 function startGame() {
+  fadeRect = new component(canvasWidth, canvasHeight, fadeColor, 0, 0); 
   startButton = new component(startButtonWidth, startButtonHeight, "assets/images/start_button.png", canvasWidth/2 - startButtonWidth/2, canvasHeight/2 - startButtonHeight/2 + canvasHeight/3, "image");
   //startText = new component("50px", "Arial", "black", canvasWidth/3, canvasHeight/3, "text");
   //startText.text = "True Crime: Trenton";
@@ -97,49 +100,31 @@ function component(width, height, color, x, y, type) {
       ctx.fillRect(this.x, this.y, this.width, this.height);
     }
   }
-  /* Draws the component with changing alpha values for fading out effect */
+  /* Draws the component with changing alpha values for fading out effect
+   * Intended to be used only on the fadeRect component */
   this.fadeOut = function(scene_id) {
-    //ctx = myGameArea.context;
-    if (this.type == "image") {
-      //ctx.save();
-      ctx.globalAlpha = ga; //change the global alpha so that the image is drawn with that opacity
-      console.log("ga:"+ga);
-      this.image = new Image();
-      this.image.onload = () => {
-        ctx.drawImage(this.image, this.x, this.y, this.width, this.height);
-      };
-      this.image.src = color;
-      //ctx.restore();
-      
-      ga = ga - 0.01;
-      if (ga <= 0.0) {
-        
-        fadingOut = false;
-        sceneID = scene_id;
-        fadingIn = true;
-      }
-    }
+    ctx.fillStyle = color;
+    ctx.fillRect(this.x, this.y, this.width, this.height);
+    console.log("fadeAlpha:"+fadeAlpha);
+    color = "rgba(0,0,0," + fadeAlpha + ")";
+    fadeAlpha = fadeAlpha + 0.01;
+    if (fadeAlpha > 1.0) {
+      fadingOut = false;
+      sceneID = scene_id;
+      fadingIn = true;
+     }
   }
-  /* Draws the component with changing alpha values for fading in effect */
+  /* Draws the component with changing alpha values for fading in effect 
+   * Intended to be used only on the fadeRect component */
   this.fadeIn = function() {
-    //ctx = myGameArea.context;
-    if (this.type == "image") {
-      //ctx.save();
-      ctx.globalAlpha = ga; //change the global alpha so that the image is drawn with that opacity
-      console.log("ga:"+ga);
-      this.image = new Image();
-      this.image.onload = () => {
-        ctx.drawImage(this.image, this.x, this.y, this.width, this.height);
-      }
-      this.image.src = color;
-      //ctx.restore();
-      
-      ga = ga + 0.01;
-      if (ga > 1.0) {
-        ga = 1.0;
-        fadingIn = false;
-      }
-    }
+    ctx.fillStyle = color;
+    ctx.fillRect(this.x, this.y, this.width, this.height);
+    console.log("fadeAlpha:"+fadeAlpha);
+    color = "rgba(0,0,0," + fadeAlpha + ")";
+    fadeAlpha = fadeAlpha - 0.01;
+    if (fadeAlpha < 0.0) {
+      fadingIn = false;
+     }
   }
   /* Updates component position on canvas */
   this.newPos = function() {
@@ -162,26 +147,24 @@ function component(width, height, color, x, y, type) {
 }
 
 /**** Drawing Functions ****/
+
 function drawScene0() {
   startBackground.newPos();
   startBackground.update();
   startButton.newPos();
   startButton.update();
 }
+
 function drawScene1() {
   crimeBackground.newPos();
   crimeBackground.update();
 }
 
 function fadeOutScene0() {
-  //ctx.save();
-  startBackground.fadeOut(nextScene);
-  //ctx.restore();
+  fadeRect.fadeOut(nextScene);
 }
 function fadeInScene1() {
-  //ctx.save();
-  crimeBackground.fadeIn();
-  //ctx.restore();
+  fadeRect.fadeIn();
 }
 
 /* Draws a frame */
@@ -205,6 +188,7 @@ function updateGameArea() {
         drawScene0();
       }
       else if (fadingOut) {
+        drawScene0();
         fadeOutScene0();
       }
       break;
@@ -214,6 +198,7 @@ function updateGameArea() {
         drawScene1();
       }
       else if (fadingIn) {
+        drawScene1();
         fadeInScene1();
       }
   }
