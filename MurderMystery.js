@@ -1,5 +1,5 @@
-var canvasWidth = 1152;
-var canvasHeight = 648;
+var canvasWidth = 1152; //16:9 resolution
+var canvasHeight = 648; //16:9 resolution
 var sceneID = 0;
 var nextScene = 0;
 var fadeAlpha = 0.0; // alpha value for fadeRect
@@ -13,27 +13,32 @@ var startBackground;
 var startButton;
 var startButtonWidth = .2*canvasWidth;
 var startButtonHeight = .2*canvasHeight;
-//var startText;
+var introText1;
+var introText2;
+var introTextMap;
+var introBackground;
+var introMapButton;
+var introMapButtonWidth = .2*canvasWidth;
+var introMapButtonHeight = .2*canvasHeight;
 var crimeBackground;
 
 /* Gets called when page loads */
 function startGame() {
   fadeRect = new component(canvasWidth, canvasHeight, fadeColor, 0, 0); 
-  startButton = new component(startButtonWidth, startButtonHeight, "assets/images/start_button.png", canvasWidth/2 - startButtonWidth/2, canvasHeight/2 - startButtonHeight/2 + canvasHeight/3, "image");
-  //startText = new component("50px", "Arial", "black", canvasWidth/3, canvasHeight/3, "text");
-  //startText.text = "True Crime: Trenton";
+  
   startBackground = new component(canvasWidth, canvasHeight, "assets/images/start_screen_background.png", 0, 0, "image");
+  startButton = new component(startButtonWidth, startButtonHeight, "assets/images/start_button.png", canvasWidth/2 - startButtonWidth/2, canvasHeight/2 - startButtonHeight/2 + canvasHeight/3, "image");
+  
+  introBackground = new component(canvasWidth, canvasHeight, "assets/images/black.jpg", 0, 0, "image");
+  introText1 = new component("50px", "Arial", "white", canvasWidth/9, canvasHeight/5, "text");
+  introText1.text = "Trenton: 1939";
+  introText2 = new component("24px", "Arial", "white", canvasWidth/9, canvasHeight/3, "text");
+  introText2.text = "Officer 1: Good evening Detective, I am afraid we have a problem on Duck Island,\nwe are going to need you to come down to headquarters right away.";
+  introTextMap = new component("24px", "Arial", "white", canvasWidth/2 - 50, canvasHeight/2 + canvasHeight/5, "text");
+  introTextMap.text = "View Map:";
+  introMapButton = new component(introMapButtonWidth, introMapButtonHeight, "assets/images/map.jpg", canvasWidth/2 - introMapButtonWidth/2, canvasHeight/2 - introMapButtonHeight/2 + canvasHeight/3, "image");
   crimeBackground = new component(canvasWidth, canvasHeight, "assets/images/crime_scene.png", 0, 0, "image");
   myGameArea.start();
-}
-
-/* Converts document coordinates to coordinates relative to the canvas */
-function getMousePos(canvas, evt) {
-  var rect = canvas.getBoundingClientRect();
-  return {
-    x: evt.clientX - rect.left,
-    y: evt.clientY - rect.top
-  };
 }
 
 var myGameArea = {
@@ -94,7 +99,7 @@ function component(width, height, color, x, y, type) {
     } else if (this.type == "text") {
       ctx.font = this.width + " " + this.height;
       ctx.fillStyle = color;
-      ctx.fillText(this.text, this.x, this.y);
+      fillTextMultiLine(ctx, this.text, this.x, this.y);
     } else {
       ctx.fillStyle = color;
       ctx.fillRect(this.x, this.y, this.width, this.height);
@@ -146,6 +151,27 @@ function component(width, height, color, x, y, type) {
   }
 }
 
+/**** Helper Functions ****/
+
+/* Converts document coordinates to coordinates relative to the canvas */
+function getMousePos(canvas, evt) {
+  var rect = canvas.getBoundingClientRect();
+  return {
+    x: evt.clientX - rect.left,
+    y: evt.clientY - rect.top
+  };
+}
+
+/* Draws text on multiple lines when separated by '\n' delimiter */
+function fillTextMultiLine(ctx, text, x, y) {
+  var lineHeight = ctx.measureText("M").width * 1.2;
+  var lines = text.split("\n");
+  for (var i = 0; i < lines.length; ++i) {
+    ctx.fillText(lines[i], x, y);
+    y += lineHeight;
+  }
+}
+
 /**** Drawing Functions ****/
 
 function drawScene0() {
@@ -156,14 +182,28 @@ function drawScene0() {
 }
 
 function drawScene1() {
+  introBackground.newPos();
+  introBackground.update();
+  introText1.newPos();
+  introText1.update();
+  introText2.newPos();
+  introText2.update();
+  introTextMap.newPos();
+  introTextMap.update();
+  introMapButton.newPos();
+  introMapButton.update();
+}
+
+function drawScene2() {
   crimeBackground.newPos();
   crimeBackground.update();
 }
 
-function fadeOutScene0() {
+function fadeOutScene() {
   fadeRect.fadeOut(nextScene);
 }
-function fadeInScene1() {
+
+function fadeInScene() {
   fadeRect.fadeIn();
 }
 
@@ -171,16 +211,23 @@ function fadeInScene1() {
 function updateGameArea() { 
   myGameArea.clear(); //clear canvas before each frame
   
+  /* Check for user actions */
   if (myGameArea.mousePos.x && myGameArea.mousePos.y) {
     if (startButton.clicked()) {
-      //fade to next scene
+      /* fade scene 0 to next scene */
       if (!fadingOut && !fadingIn && sceneID == 0) {
         fadingOut = true;
         nextScene = 1;
       }
     }
+    if (introTextMap.clicked()) {
+      if (!fadingOut && !fadingIn && sceneID == 1) {
+        fadingOut = true;
+        nextScene = 2;
+      }
+    }
   }
-  
+
   /* Draw the current scene */
   switch (sceneID) {
     case 0: //start screen
@@ -189,17 +236,30 @@ function updateGameArea() {
       }
       else if (fadingOut) {
         drawScene0();
-        fadeOutScene0();
+        fadeOutScene();
       }
       break;
-    case 1: //crime scene
+    case 1: //intro scene
       if (!fadingOut && !fadingIn) {
-        console.log("draw");
         drawScene1();
+      }
+      else if (fadingOut) {
+        drawScene1();
+        fadeOutScene();
       }
       else if (fadingIn) {
         drawScene1();
-        fadeInScene1();
+        fadeInScene();
       }
+      break;
+    case 2: //crime scene
+      if (!fadingOut && !fadingIn) {
+        drawScene2();
+      }
+      else if (fadingIn) {
+        drawScene2();
+        fadeInScene();
+      }
+      break;
   }
 }
