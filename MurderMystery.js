@@ -1,5 +1,5 @@
-var canvasWidth = 1152; //16:9 resolution
-var canvasHeight = 648; //16:9 resolution
+var canvasWidth = 1024; //16:9 resolution
+var canvasHeight = 576; //16:9 resolution
 var sceneID = 0;
 var nextScene = 0;
 var fadeAlpha = 0.0; // alpha value for fadeRect
@@ -13,31 +13,51 @@ var startBackground;
 var startButton;
 var startButtonWidth = .2*canvasWidth;
 var startButtonHeight = .2*canvasHeight;
+var introBackground;
 var introText1;
 var introText2;
 var introTextMap;
-var introBackground;
 var introMapButton;
 var introMapButtonWidth = .2*canvasWidth;
 var introMapButtonHeight = .2*canvasHeight;
+var mapBackground;
+var mapStationIcon;
+var mapIconWidth = .2*canvasWidth;
+var mapIconHeight = .2*canvasHeight;
+var stationBackground;
+var sheriffText1;
 var crimeBackground;
 
-/* Gets called when page loads */
+/* Gets called when page loads. Instantiate game components here. */
 function startGame() {
   fadeRect = new component(canvasWidth, canvasHeight, fadeColor, 0, 0); 
   
+  /* Start scene */
   startBackground = new component(canvasWidth, canvasHeight, "assets/images/start_screen_background.png", 0, 0, "image");
   startButton = new component(startButtonWidth, startButtonHeight, "assets/images/start_button.png", canvasWidth/2 - startButtonWidth/2, canvasHeight/2 - startButtonHeight/2 + canvasHeight/3, "image");
   
+  /* Intro scene */
   introBackground = new component(canvasWidth, canvasHeight, "assets/images/black.jpg", 0, 0, "image");
   introText1 = new component("50px", "Arial", "white", canvasWidth/9, canvasHeight/5, "text");
   introText1.text = "Trenton: 1939";
   introText2 = new component("24px", "Arial", "white", canvasWidth/9, canvasHeight/3, "text");
-  introText2.text = "Officer 1: Good evening Detective, I am afraid we have a problem on Duck Island,\nwe are going to need you to come down to headquarters right away.";
+  introText2.text = "Officer 1:\nGood evening Detective, I'm afraid we have a problem on Duck Island,\nwe're going to need you to come down to headquarters right away.";
   introTextMap = new component("24px", "Arial", "white", canvasWidth/2 - 50, canvasHeight/2 + canvasHeight/5, "text");
   introTextMap.text = "View Map:";
   introMapButton = new component(introMapButtonWidth, introMapButtonHeight, "assets/images/map.jpg", canvasWidth/2 - introMapButtonWidth/2, canvasHeight/2 - introMapButtonHeight/2 + canvasHeight/3, "image");
+  
+  /* Map scene */
+  mapBackground = new component(canvasWidth, canvasHeight, "assets/images/map_inverted.jpg", 0, 0, "image");
+  mapStationIcon = new component(mapIconWidth, mapIconHeight, "assets/images/pd.png", canvasWidth/4, canvasHeight/2 + canvasHeight/6, "image");
+  
+  /* Police station scene */
+  stationBackground = new component(canvasWidth, canvasHeight, "assets/images/station_scene_background.jpg", 0, 0, "image");
+  sheriffText1 = new component("24px", "Arial", "white", canvasWidth/9, canvasHeight/2 + canvasHeight/5, "text");
+  sheriffText1.text = "Sheriff:\nThank you for coming down so quickly, Detective, I regret to inform you,\nthere has been a murder.  A young couple from the Trenton area have been\nbrutally killed on Lover’s Lane down at Duck Island.\n\nIt’s your job to go down there and investigate what happened."
+  
+  /* Crime scene */
   crimeBackground = new component(canvasWidth, canvasHeight, "assets/images/crime_scene.png", 0, 0, "image");
+  
   myGameArea.start();
 }
 
@@ -195,6 +215,20 @@ function drawScene1() {
 }
 
 function drawScene2() {
+  mapBackground.newPos();
+  mapBackground.update();
+  mapStationIcon.newPos();
+  mapStationIcon.update();
+}
+
+function drawScene3() {
+  stationBackground.newPos();
+  stationBackground.update();
+  sheriffText1.newPos();
+  sheriffText1.update();
+}
+
+function drawScene4() {
   crimeBackground.newPos();
   crimeBackground.update();
 }
@@ -214,16 +248,24 @@ function updateGameArea() {
   /* Check for user actions */
   if (myGameArea.mousePos.x && myGameArea.mousePos.y) {
     if (startButton.clicked()) {
-      /* fade scene 0 to next scene */
+      /* fade start scene to next scene */
       if (!fadingOut && !fadingIn && sceneID == 0) {
         fadingOut = true;
         nextScene = 1;
       }
     }
     if (introTextMap.clicked()) {
+      /* fade intro scene to next scene */
       if (!fadingOut && !fadingIn && sceneID == 1) {
         fadingOut = true;
         nextScene = 2;
+      }
+    }
+    if (mapStationIcon.clicked()) {
+      /* fade map scene to police station scene */
+      if (!fadingOut && !fadingIn && sceneID == 2) {
+        fadingOut = true;
+        nextScene = 3;
       }
     }
   }
@@ -252,12 +294,29 @@ function updateGameArea() {
         fadeInScene();
       }
       break;
-    case 2: //crime scene
+    case 2: //map scene
       if (!fadingOut && !fadingIn) {
         drawScene2();
       }
+      else if (fadingOut) {
+        drawScene2();
+        fadeOutScene();
+      }
       else if (fadingIn) {
         drawScene2();
+        fadeInScene();
+      }
+      break;
+    case 3: //police station scene
+      if (!fadingOut && !fadingIn) {
+        drawScene3();
+      }
+      else if (fadingOut) {
+        drawScene3();
+        fadeOutScene();
+      }
+      else if (fadingIn) {
+        drawScene3();
         fadeInScene();
       }
       break;
