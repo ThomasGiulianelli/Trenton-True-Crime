@@ -48,6 +48,9 @@ var crimeText7;
 var mapMyatovichIcon;
 var mapTonzilloIcon;
 var mapHillIcon;
+var myatovichBackground;
+var tonzilloBackground;
+var hillBackground;
 
 /* Gets called when page loads. Instantiate game components here. */
 function startGame() {
@@ -100,6 +103,15 @@ function startGame() {
   crimeText6.text = "You:\nThank you for all that information, I will keep that in mind when I investigate\nfurther. Now, if you will excuse me, I am going to search for evidence.";
   crimeText7 = new component("24px", "Arial", "white", canvasWidth/9, canvasHeight/2 + canvasHeight/4, "text");
   crimeText7.text = "Officer 2:\nNo problem Detective, good luck.";
+  
+  /* Myatovich suspect scene */
+  myatovichBackground = new component(canvasWidth, canvasHeight, "assets/images/bedroom.jpg", 0, 0, "image");
+  
+  /* Tonzillo suspect scene */
+  tonzilloBackground = new component(canvasWidth, canvasHeight, "assets/images/room.jpg", 0, 0, "image");
+  
+  /* Hill suspect scene */
+  hillBackground = new component(canvasWidth, canvasHeight, "assets/images/bedroomwithgun.jpg", 0, 0, "image");
   
   myGameArea.start();
 }
@@ -355,6 +367,21 @@ function drawScene4() {
   }
 }
 
+function drawScene5() {
+  myatovichBackground.newPos();
+  myatovichBackground.update();
+}
+
+function drawScene6() {
+  tonzilloBackground.newPos();
+  tonzilloBackground.update();
+}
+
+function drawScene7() {
+  hillBackground.newPos();
+  hillBackground.update();
+}
+
 function fadeOutScene() {
   fadeRect.fadeOut(nextScene);
 }
@@ -428,6 +455,27 @@ function updateGameArea() {
         }
       } 
     }
+    if (mapMyatovichIcon.clicked()) {
+      /* fade map scene to Myatovich supsect scene */
+      if (!fadingOut && !fadingIn && sceneID == 2) {
+        fadingOut = true;
+        nextScene = 5;
+      }
+    }
+    if (mapTonzilloIcon.clicked()) {
+      /* fade map scene to Tonzillo supsect scene */
+      if (!fadingOut && !fadingIn && sceneID == 2) {
+        fadingOut = true;
+        nextScene = 6;
+      }
+    }
+    if (mapHillIcon.clicked()) {
+      /* fade map scene to Hill supsect scene */
+      if (!fadingOut && !fadingIn && sceneID == 2) {
+        fadingOut = true;
+        nextScene = 7;
+      }
+    }
   }
 
   /* Draw the current scene */
@@ -490,6 +538,45 @@ function updateGameArea() {
       }
       else if (fadingIn) {
         drawScene4();
+        fadeInScene();
+      }
+      break;
+      case 5: //myatovich suspect scene
+      if (!fadingOut && !fadingIn) {
+        drawScene5();
+      }
+      else if (fadingOut) {
+        drawScene5();
+        fadeOutScene();
+      }
+      else if (fadingIn) {
+        drawScene5();
+        fadeInScene();
+      }
+      break;
+      case 6: //tonzillo suspect scene
+      if (!fadingOut && !fadingIn) {
+        drawScene6();
+      }
+      else if (fadingOut) {
+        drawScene6();
+        fadeOutScene();
+      }
+      else if (fadingIn) {
+        drawScene6();
+        fadeInScene();
+      }
+      break;
+      case 7: //hill suspect scene
+      if (!fadingOut && !fadingIn) {
+        drawScene7();
+      }
+      else if (fadingOut) {
+        drawScene7();
+        fadeOutScene();
+      }
+      else if (fadingIn) {
+        drawScene7();
         fadeInScene();
       }
       break;
