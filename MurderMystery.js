@@ -1,5 +1,7 @@
 var canvasWidth = 1024; //16:9 resolution
 var canvasHeight = 576; //16:9 resolution
+var gameStates = Object.freeze({"intro":1, "sheriff_debrief":2, "visited_crimescene":3, "visited_suspects":4}); //game states enum
+var gameState = gameStates.intro; //used to keep track of player progress
 var sceneID = 0;
 var nextScene = 0;
 var mapState = 0; //used to determine what to draw on map depending on when the player visits it.
@@ -43,6 +45,9 @@ var crimeText4;
 var crimeText5;
 var crimeText6;
 var crimeText7;
+var mapMyatovichIcon;
+var mapTonzilloIcon;
+var mapHillIcon;
 
 /* Gets called when page loads. Instantiate game components here. */
 function startGame() {
@@ -67,6 +72,9 @@ function startGame() {
   mapBackground = new component(canvasWidth, canvasHeight, "assets/images/map_inverted.jpg", 0, 0, "image");
   mapStationIcon = new component(mapIconWidth, mapIconHeight, "assets/images/pd.png", canvasWidth/4, canvasHeight/2 + canvasHeight/6, "image");
   mapDuckIcon = new component(mapIconWidth*.8, mapIconWidth*.8, "assets/images/duck_island_icon.png", canvasWidth/3, canvasHeight/20, "image");
+  mapMyatovichIcon = new component(mapIconHeight*.9, mapIconHeight*.9, "assets/images/house.png", canvasWidth/9, canvasHeight/3, "image");
+  mapTonzilloIcon = new component(mapIconHeight*.9, mapIconHeight*.9, "assets/images/house.png", canvasWidth/2, canvasHeight/2.2, "image");
+  mapHillIcon = new component(mapIconHeight*.9, mapIconHeight*.9, "assets/images/house.png", canvasWidth - canvasWidth/7, canvasHeight/6, "image");
   
   /* Police station scene */
   stationBackground = new component(canvasWidth, canvasHeight, "assets/images/station_scene_background.jpg", 0, 0, "image");
@@ -264,6 +272,17 @@ function drawScene2() {
       mapDuckIcon.newPos();
       mapDuckIcon.update();
       break;
+    case 2:
+      mapStationIcon.newPos();
+      mapStationIcon.update();
+      mapDuckIcon.newPos();
+      mapDuckIcon.update();
+      mapMyatovichIcon.newPos();
+      mapMyatovichIcon.update();
+      mapTonzilloIcon.newPos();
+      mapTonzilloIcon.update();
+      mapHillIcon.newPos();
+      mapHillIcon.update();
   }
 }
 
@@ -328,9 +347,12 @@ function drawScene4() {
       crimeText7.update();
       break;
     case 8:
+      returnToMapButton.newPos();
+      returnToMapButton.update();
+      returnToMapText.newPos();
+      returnToMapText.update();
       break;
   }
-  
 }
 
 function fadeOutScene() {
@@ -344,6 +366,13 @@ function fadeInScene() {
 /* Draws a frame */
 function updateGameArea() { 
   myGameArea.clear(); //clear canvas before each frame
+  
+  if (gameState == gameStates.sheriff_debrief) {
+    mapState = 1;
+  }
+  else if (gameState == gameStates.visited_crimescene) {
+    mapState = 2;
+  }
   
   /* Check for user actions */
   if (myGameArea.mousePos.x && myGameArea.mousePos.y) {
@@ -369,24 +398,33 @@ function updateGameArea() {
       }
     }
     if (returnToMapButton.clicked()) {
-      /* fade map scene to police station scene */
+      /* fade police station scene to map scene */
       if (!fadingOut && !fadingIn && sceneID == 3) {
         fadingOut = true;
         nextScene = 2;
-        mapState = 1;
+        if (gameState == gameStates.intro) {
+          gameState = gameStates.sheriff_debrief;
+        }
+      }
+      if (!fadingOut && !fadingIn && sceneID == 4) {
+        fadingOut = true;
+        nextScene = 2;
+        gameState = gameStates.visited_crimescene;
       }
     }
     if (mapDuckIcon.clicked()) {
-      if (!fadingOut && !fadingIn && sceneID == 2 && mapState == 1) {
+      /* fade map scene to crime scene */
+      if (!fadingOut && !fadingIn && sceneID == 2 && (gameState == gameStates.sheriff_debrief || gameState == gameStates.visited_crimescene)) {
         fadingOut = true;
         nextScene = 4;
       } 
     }
     if (dialogueBox.clicked()) {
+      /* Display next block of text */
       if (!fadingOut && !fadingIn && sceneID == 4 && mouseUp) {
         if (currentDialogue < 8) {
           currentDialogue++;
-          mouseUp = false;
+          mouseUp = false; //prevents this code block from executing again until the user releases the mouse button
         }
       } 
     }
