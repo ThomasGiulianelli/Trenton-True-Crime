@@ -370,16 +370,28 @@ function drawScene4() {
 function drawScene5() {
   myatovichBackground.newPos();
   myatovichBackground.update();
+  returnToMapButton.newPos();
+  returnToMapButton.update();
+  returnToMapText.newPos();
+  returnToMapText.update();
 }
 
 function drawScene6() {
   tonzilloBackground.newPos();
   tonzilloBackground.update();
+  returnToMapButton.newPos();
+  returnToMapButton.update();
+  returnToMapText.newPos();
+  returnToMapText.update();
 }
 
 function drawScene7() {
   hillBackground.newPos();
   hillBackground.update();
+  returnToMapButton.newPos();
+  returnToMapButton.update();
+  returnToMapText.newPos();
+  returnToMapText.update();
 }
 
 function fadeOutScene() {
@@ -438,10 +450,15 @@ function updateGameArea() {
         nextScene = 2;
         gameState = gameStates.visited_crimescene;
       }
+      if (!fadingOut && !fadingIn && sceneID > 4) {
+        fadingOut = true;
+        nextScene = 2;
+        gameState = gameStates.visited_suspects;
+      }
     }
     if (mapDuckIcon.clicked()) {
       /* fade map scene to crime scene */
-      if (!fadingOut && !fadingIn && sceneID == 2 && (gameState == gameStates.sheriff_debrief || gameState == gameStates.visited_crimescene)) {
+      if (!fadingOut && !fadingIn && sceneID == 2 && (gameState == gameStates.sheriff_debrief || gameState == gameStates.visited_crimescene || gameState == gameStates.visited_suspects)) {
         fadingOut = true;
         nextScene = 4;
       } 
