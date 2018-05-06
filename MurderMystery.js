@@ -121,21 +121,21 @@ function startGame() {
   
   /* Myatovich suspect scene */
   myatovichBackground = new component(canvasWidth, canvasHeight, "assets/images/bedroom.jpg", 0, 0, "image");
-  myatovichText1 = new component("24px", "Arial", "white", canvasWidth/9, canvasHeight/2 + canvasHeight/4, "text");
+  myatovichText1 = new component("24px", "Arial", "white", canvasWidth/6, canvasHeight/2 + canvasHeight/4, "text");
   myatovichText1.text = "Mr. Myatovich:\nSure, I was upset, but I would never hurt my little girl.";
-  myatovichSuspect = new component(mapIconWidth, mapIconHeight, "assets/images/suspectdad.png", canvasWidth/10, canvasHeight - suspectHeight);
+  myatovichSuspect = new component(suspectWidth, suspectHeight, "assets/images/suspectdad.png", 0, canvasHeight - suspectHeight, "image");
   
   /* Tonzillo suspect scene */
   tonzilloBackground = new component(canvasWidth, canvasHeight, "assets/images/room.jpg", 0, 0, "image");
-  tonzilloText1 = new component("24px", "Arial", "white", canvasWidth/9, canvasHeight/2 + canvasHeight/4, "text");
-  tonzilloText1.text = "Mrs. Tonzillo:\nI was shocked to find out Jim was cheating on me, especially because I’m pregnant\nwith his child. But, I couldn’t have killed him, I’m not strong enough\nnor do I have the stomach to deal with blood.";
-  tonzilloSuspect = new component(suspectWidth, suspectHeight, "assets/images/suspectwife.png", canvasWidth/10, canvasHeight - suspectHeight);
+  tonzilloText1 = new component("24px", "Arial", "white", canvasWidth/6, canvasHeight/2 + canvasHeight/4, "text");
+  tonzilloText1.text = "Mrs. Tonzillo:\nI was shocked to find out Jim was cheating on me, especially because\nI’m pregnant with his child. But, I couldn’t have killed him, I’m not\nstrong enough nor do I have the stomach to deal with blood.";
+  tonzilloSuspect = new component(suspectWidth, suspectHeight, "assets/images/suspectwife.png", 0, canvasHeight - suspectHeight, "image");
   
   /* Hill suspect scene */
   hillBackground = new component(canvasWidth, canvasHeight, "assets/images/factory.jpg", 0, 0, "image");
-  hillText1 = new component("24px", "Arial", "white", canvasWidth/9, canvasHeight/2 + canvasHeight/4, "text");
-  hillText1.text = "Mr. Hill:\nYeah, I worked with Jim, he was a fine guy and all, he just talked about himself mostly.\nBut, I couldn’t have done the murder, I was down at the factory when it happened.";
-  hillSuspect = new component(suspectWidth, suspectHeight, "assets/images/suspectkiller.png", canvasWidth/10, canvasHeight - suspectHeight);
+  hillText1 = new component("24px", "Arial", "white", canvasWidth/6, canvasHeight/2 + canvasHeight/4, "text");
+  hillText1.text = "Mr. Hill:\nYeah, I worked with Jim, he was a fine guy and all, he just\ntalked about himself mostly. But, I couldn’t have done\nthe murder, I was down at the factory when it happened.";
+  hillSuspect = new component(suspectWidth, suspectHeight, "assets/images/suspectkiller.png", 0, canvasHeight - suspectHeight, "image");
   
   myGameArea.start();
 }
