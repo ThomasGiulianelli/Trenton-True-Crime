@@ -10,6 +10,7 @@ var officerDialogue = 1; //used to track what dialogue is being displayed
 var myatovichDialogue = 1; //used to track what dialogue is being displayed
 var tonzilloDialogue = 1; //used to track what dialogue is being displayed
 var hillDialogue = 1; //used to track what dialogue is being displayed
+var evidence = 0; //used to track what evidence description is being displayed
 var mouseUp = true; //manual check for mouseup or touchend event
 var fadeAlpha = 0.0; // alpha value for fadeRect
 var fadingOut = false;
@@ -19,6 +20,9 @@ var fadeColor = "rgba(0,0,0,0)";
 /* game components */
 var fadeRect; //covers canvas and changes alpha to create fading effects
 var dialogueBox;
+var descriptionBox1;
+var descriptionBoxWidth = canvasWidth - canvasWidth/4;
+var descriptionBoxHeight = canvasHeight - canvasHeight/4;
 var startBackground;
 var startButton;
 var startButtonWidth = .2*canvasWidth;
@@ -43,6 +47,8 @@ var returnToMapButtonHeight = .1*canvasHeight;
 var returnToMapText;
 var mapDuckIcon;
 var crimeBackground;
+var crimeEvidence1;
+var crimeEvidenceText1;
 var crimeText1;
 var crimeText2;
 var crimeText3;
@@ -69,6 +75,7 @@ var suspectHeight = 150;
 function startGame() {
   fadeRect = new component(canvasWidth, canvasHeight, fadeColor, 0, 0); 
   dialogueBox = new component(canvasWidth, canvasHeight/3, "assets/images/000000-0.5.png", 0, canvasHeight - canvasHeight/3, "image");
+  descriptionBox1 = new component(descriptionBoxWidth, descriptionBoxHeight, "assets/images/000000-0.5.png", canvasWidth/2 - descriptionBoxWidth/2, canvasHeight/2 - canvasHeight/3, "image", "shotgun_shells");
   returnToMapButton = new component(returnToMapButtonWidth, returnToMapButtonHeight, "assets/images/crystal-button.png", canvasWidth/12, canvasHeight/20, "image");
   returnToMapText = new component("24px", "Arial", "black", canvasWidth/10, canvasHeight/9, "text");
   returnToMapText.text = "[Return to map]";
@@ -96,7 +103,7 @@ function startGame() {
   mapHillIcon = new component(mapIconHeight*.9, mapIconHeight*.9, "assets/images/house.png", canvasWidth - canvasWidth/7, canvasHeight/6, "image");
   
   /* Police station scene */
-  stationBackground = new component(canvasWidth, canvasHeight, "assets/images/station_scene_background.jpg", 0, 0, "image");
+  stationBackground = new component(canvasWidth, canvasHeight, "assets/images/policestation.jpg", 0, 0, "image");
   sheriffText1 = new component("24px", "Arial", "white", canvasWidth/9, canvasHeight/2 + canvasHeight/4, "text");
   sheriffText1.text = "Sheriff:\nThank you for coming down so quickly, Detective, I regret to inform you,\nthere has been a murder.  A young couple from the Trenton area have been\nbrutally killed on Lover’s Lane down at Duck Island.\n\nIt’s your job to go down there and investigate what happened."
   sheriffText2 = new component("24px", "Arial", "white", canvasWidth/9, canvasHeight/2 + canvasHeight/4, "text");
@@ -104,10 +111,13 @@ function startGame() {
   
   /* Crime scene */
   crimeBackground = new component(canvasWidth, canvasHeight, "assets/images/duckisland.jpg", 0, 0, "image");
+  crimeEvidence1 = new component(canvasHeight/9, canvasHeight/9, "assets/images/shotgun_shells.png", canvasWidth - canvasWidth/4, canvasHeight/2 + canvasHeight/6, "image");
+  crimeEvidenceText1 = new component("24px", "Arial", "white", canvasWidth/6, canvasHeight/2 + canvasHeight/6, "text");
+  crimeEvidenceText1.text = "A couple of spent shotgun shells. This tells us what\nweapon the murderer used.";
   crimeText1 = new component("24px", "Arial", "white", canvasWidth/9, canvasHeight/2 + canvasHeight/4, "text");
   crimeText1.text = "Officer 2:\nIt appears our victims were a young couple named Vincenzo 'Jim'\nTonzillo and Mary Myatovich. Jim was a 20-year-old man married,\nhaving an affair with Mary Myatovich. And Mary Myatovich was a 15-year-old girl.\nShe was unmarried.";
   crimeText2 = new component("24px", "Arial", "white", canvasWidth/9, canvasHeight/2 + canvasHeight/4, "text");
-  crimeText2.text = "You:\nThat is so terrible, who would want to do a thing like this to an innocent couple?";
+  crimeText2.text = "You:\nThat is so terrible, who would do such a thing?";
   crimeText3 = new component("24px", "Arial", "white", canvasWidth/9, canvasHeight/2 + canvasHeight/4, "text");
   crimeText3.text = "Officer 2:\nWell detective, we have a few leads, Mary Myatovich father found out about\nher affair and was furious, he refused to let her out of the house at night.";
   crimeText4 = new component("24px", "Arial", "white", canvasWidth/9, canvasHeight/2 + canvasHeight/4, "text");
@@ -180,11 +190,14 @@ var myGameArea = {
 }
 
 /* Constructor for game components */
-function component(width, height, color, x, y, type) {
+function component(width, height, color, x, y, type, id) {
   this.type = type;
   if (type == "image") {
     this.image = new Image();
     this.image.src = color;
+  }
+  if (id) {
+    this.id = id;
   }
   this.width = width;
   this.height = height;
@@ -366,6 +379,27 @@ function drawScene4() {
   crimeBackground.newPos();
   crimeBackground.update();
   
+  switch(evidence) {
+    case 0:
+      crimeEvidence1.newPos();
+      crimeEvidence1.update();
+      break;
+    case 1:
+      descriptionBox1.newPos();
+      descriptionBox1.update();
+      crimeEvidence1.newPos();
+      crimeEvidence1.update();
+      crimeEvidenceText1.newPos();
+      crimeEvidenceText1.update();
+      break;
+    case 2:
+      returnToMapButton.newPos();
+      returnToMapButton.update();
+      returnToMapText.newPos();
+      returnToMapText.update();
+      break;
+  }
+  
   switch(officerDialogue) {
     case 1:
       dialogueBox.newPos();
@@ -410,10 +444,6 @@ function drawScene4() {
       crimeText7.update();
       break;
     case 8:
-      returnToMapButton.newPos();
-      returnToMapButton.update();
-      returnToMapText.newPos();
-      returnToMapText.update();
       break;
   }
 }
@@ -498,7 +528,8 @@ function fadeInScene() {
 /* Draws a frame */
 function updateGameArea() { 
   myGameArea.clear(); //clear canvas before each frame
-  
+  console.log(evidence);
+  /* Check game state to update map accordingly */
   if (gameState == gameStates.sheriff_debrief) {
     mapState = 1;
   }
@@ -556,6 +587,27 @@ function updateGameArea() {
         nextScene = 4;
       } 
     }
+    if (mapMyatovichIcon.clicked()) {
+      /* fade map scene to Myatovich supsect scene */
+      if (!fadingOut && !fadingIn && sceneID == 2) {
+        fadingOut = true;
+        nextScene = 5;
+      }
+    }
+    if (mapTonzilloIcon.clicked()) {
+      /* fade map scene to Tonzillo supsect scene */
+      if (!fadingOut && !fadingIn && sceneID == 2) {
+        fadingOut = true;
+        nextScene = 6;
+      }
+    }
+    if (mapHillIcon.clicked()) {
+      /* fade map scene to Hill supsect scene */
+      if (!fadingOut && !fadingIn && sceneID == 2) {
+        fadingOut = true;
+        nextScene = 7;
+      }
+    }    
     if (dialogueBox.clicked()) {
       /* Display next block of text */
       if (!fadingOut && !fadingIn && sceneID == 3 && gameState == gameStates.visited_suspects && mouseUp) {
@@ -589,25 +641,24 @@ function updateGameArea() {
         }
       }
     }
-    if (mapMyatovichIcon.clicked()) {
-      /* fade map scene to Myatovich supsect scene */
-      if (!fadingOut && !fadingIn && sceneID == 2) {
-        fadingOut = true;
-        nextScene = 5;
+    if (descriptionBox1.clicked()) {
+      if (!fadingOut && !fadingIn && sceneID == 4 && evidence == 1 && mouseUp) {
+        evidence = 2;
+        
+        //add shells to inventory
+        
+        mouseUp = false; //prevents this code block from executing again until the user releases the mouse button
       }
     }
-    if (mapTonzilloIcon.clicked()) {
-      /* fade map scene to Tonzillo supsect scene */
-      if (!fadingOut && !fadingIn && sceneID == 2) {
-        fadingOut = true;
-        nextScene = 6;
-      }
-    }
-    if (mapHillIcon.clicked()) {
-      /* fade map scene to Hill supsect scene */
-      if (!fadingOut && !fadingIn && sceneID == 2) {
-        fadingOut = true;
-        nextScene = 7;
+    if (crimeEvidence1.clicked()) {
+      if (!fadingOut && !fadingIn && sceneID == 4 && officerDialogue == 8 && mouseUp) {
+        crimeEvidence1.width = canvasWidth/6;
+        crimeEvidence1.height = canvasWidth/6;
+        crimeEvidence1.x = canvasWidth/2 - crimeEvidence1.width/2;
+        crimeEvidence1.y = canvasHeight/2 - crimeEvidence1.height/2 - canvasHeight/7;
+        evidence = 1;
+        
+        mouseUp = false; //prevents this code block from executing again until the user releases the mouse button
       }
     }
   }
