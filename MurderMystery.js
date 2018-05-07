@@ -4,13 +4,17 @@ var gameStates = Object.freeze({"intro":1, "sheriff_debrief":2, "visited_crimesc
 var gameState = gameStates.intro; //used to keep track of player progress
 var sceneID = 0;
 var nextScene = 0;
-var mapState = 0; //used to determine what to draw on map depending on when the player visits it.
-var sheriffDialogue = 1; //used to track what dialogue is being displayed
-var officerDialogue = 1; //used to track what dialogue is being displayed
-var myatovichDialogue = 1; //used to track what dialogue is being displayed
-var tonzilloDialogue = 1; //used to track what dialogue is being displayed
-var hillDialogue = 1; //used to track what dialogue is being displayed
-var evidence = 0; //used to track what evidence description is being displayed
+var mapState = 0; //used for determining what to draw on map, depends on when the player visits it.
+var displayReturn = false; //used for controlling whether or not the returnToMapButton should be displayed
+var displayMagnify = false; //used for controlling whether or not the magnifying glass icon should be displayed
+var inventoryOpen = false; //used for checking if inventory should be displayed
+var acquiredCrimeEvidence1 = false; //used for displaying crime evidence 1 in the inventory
+var sheriffDialogue = 1; //used for tracking what dialogue is being displayed
+var officerDialogue = 1; //used for tracking what dialogue is being displayed
+var myatovichDialogue = 1; //used for tracking what dialogue is being displayed
+var tonzilloDialogue = 1; //used for tracking what dialogue is being displayed
+var hillDialogue = 1; //used for tracking what dialogue is being displayed
+var evidence = 0; //used for tracking what evidence description is being displayed
 var mouseUp = true; //manual check for mouseup or touchend event
 var fadeAlpha = 0.0; // alpha value for fadeRect
 var fadingOut = false;
@@ -45,6 +49,8 @@ var returnToMapButton;
 var returnToMapButtonWidth = .2*canvasWidth;
 var returnToMapButtonHeight = .1*canvasHeight;
 var returnToMapText;
+var magnifyingIcon;
+var inventory;
 var mapDuckIcon;
 var crimeBackground;
 var crimeEvidence1;
@@ -79,6 +85,8 @@ function startGame() {
   returnToMapButton = new component(returnToMapButtonWidth, returnToMapButtonHeight, "assets/images/crystal-button.png", canvasWidth/12, canvasHeight/20, "image");
   returnToMapText = new component("24px", "Arial", "black", canvasWidth/10, canvasHeight/9, "text");
   returnToMapText.text = "[Return to map]";
+  magnifyingIcon = new component(canvasHeight/5, canvasHeight/5, "assets/images/magnifying_glass.png", canvasWidth - canvasHeight/5, canvasHeight - canvasHeight/5, "image");
+  inventory = new component(canvasWidth/4, canvasHeight - canvasHeight/5, "black", canvasWidth - canvasWidth/4, 0);
   
   /* Start scene */
   startBackground = new component(canvasWidth, canvasHeight, "assets/images/start_screen_background.png", 0, 0, "image");
@@ -295,6 +303,7 @@ function fillTextMultiLine(ctx, text, x, y) {
 
 /**** Drawing Functions ****/
 
+/* Start scene */
 function drawScene0() {
   startBackground.newPos();
   startBackground.update();
@@ -302,6 +311,7 @@ function drawScene0() {
   startButton.update();
 }
 
+/* Intro scene */
 function drawScene1() {
   introBackground.newPos();
   introBackground.update();
@@ -315,6 +325,7 @@ function drawScene1() {
   introMapButton.update();
 }
 
+/* Map scene */
 function drawScene2() {
   mapBackground.newPos();
   mapBackground.update();
@@ -342,8 +353,14 @@ function drawScene2() {
       mapHillIcon.newPos();
       mapHillIcon.update();
   }
+  
+  if (displayMagnify) {
+    magnifyingIcon.newPos();
+    magnifyingIcon.update();
+  }
 }
 
+/* Police station scene */
 function drawScene3() {
   stationBackground.newPos();
   stationBackground.update();
@@ -357,10 +374,12 @@ function drawScene3() {
         sheriffText2.update();
         break;
       case 2:
-        returnToMapButton.newPos();
-        returnToMapButton.update();
-        returnToMapText.newPos();
-        returnToMapText.update();
+        break;
+    }
+    
+    if (displayMagnify) {
+      magnifyingIcon.newPos();
+      magnifyingIcon.update();
     }
   }
   else {
@@ -368,6 +387,9 @@ function drawScene3() {
     dialogueBox.update();
     sheriffText1.newPos();
     sheriffText1.update();
+  }
+  
+  if (displayReturn) {
     returnToMapButton.newPos();
     returnToMapButton.update();
     returnToMapText.newPos();
@@ -375,6 +397,7 @@ function drawScene3() {
   }
 }
 
+/* Crime scene */
 function drawScene4() {
   crimeBackground.newPos();
   crimeBackground.update();
@@ -393,10 +416,6 @@ function drawScene4() {
       crimeEvidenceText1.update();
       break;
     case 2:
-      returnToMapButton.newPos();
-      returnToMapButton.update();
-      returnToMapText.newPos();
-      returnToMapText.update();
       break;
   }
   
@@ -446,8 +465,20 @@ function drawScene4() {
     case 8:
       break;
   }
+  
+  if (displayMagnify) {
+    magnifyingIcon.newPos();
+    magnifyingIcon.update();
+  }
+  if (displayReturn) {
+    returnToMapButton.newPos();
+    returnToMapButton.update();
+    returnToMapText.newPos();
+    returnToMapText.update();
+  }
 }
 
+/* Myatovich suspect scene */
 function drawScene5() {
   myatovichBackground.newPos();
   myatovichBackground.update();
@@ -463,14 +494,22 @@ function drawScene5() {
     case 2:
       myatovichSuspect.newPos();
       myatovichSuspect.update();
-      returnToMapButton.newPos();
-      returnToMapButton.update();
-      returnToMapText.newPos();
-      returnToMapText.update();
       break;
+  }
+  
+  if (displayMagnify) {
+    magnifyingIcon.newPos();
+    magnifyingIcon.update();
+  }
+  if (displayReturn) {
+    returnToMapButton.newPos();
+    returnToMapButton.update();
+    returnToMapText.newPos();
+    returnToMapText.update();
   }
 }
 
+/* Tonzillo suspect scene */
 function drawScene6() {
   tonzilloBackground.newPos();
   tonzilloBackground.update();
@@ -486,14 +525,22 @@ function drawScene6() {
     case 2:
       tonzilloSuspect.newPos();
       tonzilloSuspect.update();
-      returnToMapButton.newPos();
-      returnToMapButton.update();
-      returnToMapText.newPos();
-      returnToMapText.update();
       break;
+  }
+  
+  if (displayMagnify) {
+    magnifyingIcon.newPos();
+    magnifyingIcon.update();
+  }
+  if (displayReturn) {
+    returnToMapButton.newPos();
+    returnToMapButton.update();
+    returnToMapText.newPos();
+    returnToMapText.update();
   }
 }
 
+/* Hill suspect scene */
 function drawScene7() {
   hillBackground.newPos();
   hillBackground.update();
@@ -509,11 +556,27 @@ function drawScene7() {
     case 2:
       hillSuspect.newPos();
       hillSuspect.update();
-      returnToMapButton.newPos();
-      returnToMapButton.update();
-      returnToMapText.newPos();
-      returnToMapText.update();
       break;
+  }
+  
+  if (displayMagnify) {
+    magnifyingIcon.newPos();
+    magnifyingIcon.update();
+  }
+  if (displayReturn) {
+    returnToMapButton.newPos();
+    returnToMapButton.update();
+    returnToMapText.newPos();
+    returnToMapText.update();
+  }
+}
+
+function drawInventory() {
+  inventory.newPos();
+  inventory.update();
+  if (acquiredCrimeEvidence1) {
+    crimeEvidence1.newPos();
+    crimeEvidence1.update();
   }
 }
 
@@ -528,13 +591,88 @@ function fadeInScene() {
 /* Draws a frame */
 function updateGameArea() { 
   myGameArea.clear(); //clear canvas before each frame
-  console.log(evidence);
-  /* Check game state to update map accordingly */
+
+  /* Check game state to update variables accordingly */
+  if (gameState == gameStates.intro) {
+    mapState = 0;
+    
+    if (sceneID == 3) {
+      displayReturn = true;
+    }
+  }
   if (gameState == gameStates.sheriff_debrief) {
     mapState = 1;
   }
   else if (gameState == gameStates.visited_crimescene) {
     mapState = 2;
+  }
+  
+  if (gameState > gameStates.intro) {
+    switch(sceneID) {
+      case 1:
+        displayMagnify = false;
+        displayReturn = false;
+        break;
+      case 2:
+        displayReturn = false;
+        if (mapState > 1) {
+          displayMagnify = true;
+        }
+        else {
+          displayMagnify = false;
+        }
+        break;
+      case 3:
+        if (sheriffDialogue > 1) {
+          displayMagnify = true;
+          displayReturn = true;
+        }
+        else {
+          displayMagnify = false;
+          displayReturn = false;
+        }
+        break;
+      case 4:
+        if (officerDialogue > 7) {
+          displayMagnify = true;
+          displayReturn = true;
+        }
+        else {
+          displayMagnify = false;
+          displayReturn = false;
+        }
+        break;
+      case 5:
+        if (myatovichDialogue > 1) {
+          displayMagnify = true;
+          displayReturn = true;
+        }
+        else {
+          displayMagnify = false;
+          displayReturn = false;
+        }
+        break;
+      case 6:
+        if (tonzilloDialogue > 1) {
+          displayMagnify = true;
+          displayReturn = true;
+        }
+        else {
+          displayMagnify = false;
+          displayReturn = false;
+        }
+        break;
+      case 7:
+        if (hillDialogue > 1) {
+          displayMagnify = true;
+          displayReturn = true;
+        }
+        else {
+          displayMagnify = false;
+          displayReturn = false;
+        }
+        break;
+    }
   }
   
   /* Check for user actions */
@@ -558,23 +696,24 @@ function updateGameArea() {
       if (!fadingOut && !fadingIn && sceneID == 2) {
         fadingOut = true;
         nextScene = 3;
+        sheriffDialogue = 1;
       }
     }
     if (returnToMapButton.clicked()) {
       /* fade police station scene to map scene */
-      if (!fadingOut && !fadingIn && sceneID == 3) {
+      if (!fadingOut && !fadingIn && sceneID == 3 && displayReturn) {
         fadingOut = true;
         nextScene = 2;
         if (gameState == gameStates.intro) {
           gameState = gameStates.sheriff_debrief;
         }
       }
-      if (!fadingOut && !fadingIn && sceneID == 4) {
+      if (!fadingOut && !fadingIn && sceneID == 4 && displayReturn) {
         fadingOut = true;
         nextScene = 2;
         gameState = gameStates.visited_crimescene;
       }
-      if (!fadingOut && !fadingIn && sceneID > 4) {
+      if (!fadingOut && !fadingIn && sceneID > 4 && displayReturn) {
         fadingOut = true;
         nextScene = 2;
         gameState = gameStates.visited_suspects;
@@ -641,16 +780,30 @@ function updateGameArea() {
         }
       }
     }
+    if (magnifyingIcon.clicked()) {
+      /* Toggle inventory open/close */
+      if (!fadingOut && !fadingIn && displayMagnify && mouseUp) {
+        inventoryOpen = !inventoryOpen;
+        mouseUp = false; //prevents this code block from executing again until the user releases the mouse button
+      }
+    }
     if (descriptionBox1.clicked()) {
       if (!fadingOut && !fadingIn && sceneID == 4 && evidence == 1 && mouseUp) {
+        /* Close description box and add evidence to inventory */
         evidence = 2;
         
-        //add shells to inventory
+        //add shotgun shells to inventory
+        crimeEvidence1.width = canvasHeight/9;
+        crimeEvidence1.height = canvasHeight/9;
+        crimeEvidence1.x = canvasWidth - crimeEvidence1.width;
+        crimeEvidence1.y = canvasHeight/15;
+        acquiredCrimeEvidence1 = true;
         
         mouseUp = false; //prevents this code block from executing again until the user releases the mouse button
       }
     }
     if (crimeEvidence1.clicked()) {
+      /* Show description of evidence */
       if (!fadingOut && !fadingIn && sceneID == 4 && officerDialogue == 8 && mouseUp) {
         crimeEvidence1.width = canvasWidth/6;
         crimeEvidence1.height = canvasWidth/6;
@@ -665,7 +818,7 @@ function updateGameArea() {
 
   /* Draw the current scene */
   switch (sceneID) {
-    case 0: //start screen
+    case 0: //start scene
       if (!fadingOut && !fadingIn) {
         drawScene0();
       }
@@ -690,6 +843,9 @@ function updateGameArea() {
     case 2: //map scene
       if (!fadingOut && !fadingIn) {
         drawScene2();
+        if (inventoryOpen) {
+          drawInventory();
+        }
       }
       else if (fadingOut) {
         drawScene2();
@@ -703,6 +859,9 @@ function updateGameArea() {
     case 3: //police station scene
       if (!fadingOut && !fadingIn) {
         drawScene3();
+        if (inventoryOpen) {
+          drawInventory();
+        }
       }
       else if (fadingOut) {
         drawScene3();
@@ -716,6 +875,9 @@ function updateGameArea() {
     case 4: //crime scene
       if (!fadingOut && !fadingIn) {
         drawScene4();
+        if (inventoryOpen) {
+          drawInventory();
+        }
       }
       else if (fadingOut) {
         drawScene4();
@@ -729,6 +891,9 @@ function updateGameArea() {
       case 5: //myatovich suspect scene
       if (!fadingOut && !fadingIn) {
         drawScene5();
+        if (inventoryOpen) {
+          drawInventory();
+        }
       }
       else if (fadingOut) {
         drawScene5();
@@ -742,6 +907,9 @@ function updateGameArea() {
       case 6: //tonzillo suspect scene
       if (!fadingOut && !fadingIn) {
         drawScene6();
+        if (inventoryOpen) {
+          drawInventory();
+        }
       }
       else if (fadingOut) {
         drawScene6();
@@ -755,6 +923,9 @@ function updateGameArea() {
       case 7: //hill suspect scene
       if (!fadingOut && !fadingIn) {
         drawScene7();
+        if (inventoryOpen) {
+          drawInventory();
+        }
       }
       else if (fadingOut) {
         drawScene7();
