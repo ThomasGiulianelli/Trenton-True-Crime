@@ -13,6 +13,8 @@ var acquiredCrimeEvidence1 = false; //used for displaying crime evidence 1 in th
 var acquiredCrimeEvidence2 = false; //used for displaying crime evidence 2 in the inventory
 var acquiredMyatovichEvidence1 = false; //used for displaying myatovich evidence 1 in the inventory
 var acquiredMyatovichEvidence2 = false; //used for displaying myatovich evidence 2 in the inventory
+var acquiredTonzilloEvidence1= false; //used for displaying tonzillo evidence 1 in the inventory
+var acquiredTonzilloEvidence2 = false; //used for displaying tonzillo evidence 2 in the inventory
 var acquiredHillEvidence1 = false; //used for displaying hill evidence 1 in the inventory
 var acquiredHillEvidence2 = false; //used for displaying hill evidence 2 in the inventory
 var sheriffDialogue = 1; //used for tracking what dialogue is being displayed
@@ -98,6 +100,10 @@ var mapTonzilloIcon;
 var tonzilloBackground;
 var tonzilloText1;
 var tonzilloSuspect;
+var tonzilloEvidence1;
+var tonzilloEvidence2;
+var tonzilloEvidenceText1;
+var tonzilloEvidenceText2;
 var mapHillIcon;
 var hillBackground;
 var hillText1;
@@ -226,6 +232,12 @@ function startGame() {
   
   /* Tonzillo suspect scene */
   tonzilloBackground = new component(canvasWidth, canvasHeight, "assets/images/room.jpg", 0, 0, "image");
+  tonzilloEvidence1 = new component(evidenceWidthSmall, evidenceHeightSmall, "assets/images/shoes.png", canvasWidth - canvasWidth/5, canvasHeight - canvasHeight/3, "image");
+  tonzilloEvidenceText1 = new component("24px", "Arial", "white", canvasWidth/6, canvasHeight/2 + canvasHeight/6, "text");
+  tonzilloEvidenceText1.text = "These are Mrs. Tonzillo’s shoes. They are covered in mud, much\nlike the mud that surrounds Duck Island.";
+  tonzilloEvidence2 = new component(evidenceHeightSmall, evidenceHeightSmall, "assets/images/wedding_ring.png", canvasWidth/3 + canvasWidth/15, canvasHeight/2 + evidenceHeightSmall/2, "image");
+  tonzilloEvidenceText2 = new component("24px", "Arial", "white", canvasWidth/5, canvasHeight/2 + canvasHeight/8, "text");
+  tonzilloEvidenceText2.text = "This is Mrs. Tonzillo’s wedding ring. She was still wearing\nit when we arrived questioned her.";
   tonzilloText1 = new component("24px", "Arial", "white", canvasWidth/5, canvasHeight/2 + canvasHeight/4, "text");
   tonzilloText1.text = "Mrs. Tonzillo:\nI was shocked to find out Jim was cheating on me, especially\nbecause I’m pregnant with his child. But, I couldn’t have killed him,\nI’m not strong enough nor do I have the stomach to deal with blood.";
   tonzilloSuspect = new component(suspectWidth, suspectHeight, "assets/images/suspectwife.png", 0, canvasHeight - suspectHeight, "image");
@@ -750,6 +762,64 @@ function drawScene6() {
   tonzilloBackground.newPos();
   tonzilloBackground.update();
   
+  /* Draw shoes */
+  if (!acquiredTonzilloEvidence1) {
+    switch(evidence1) {
+      case 0:
+        tonzilloEvidence1.newPos();
+        tonzilloEvidence1.update();
+        break;
+      case 1:
+        descriptionBox7.newPos();
+        descriptionBox7.update();
+        tonzilloEvidence1.newPos();
+        tonzilloEvidence1.update();
+        tonzilloEvidenceText1.newPos();
+        tonzilloEvidenceText1.update();
+        break;
+      case 2:
+        break;
+    }
+  }
+  /* Allows user to open up the description again after having collected the evidence */
+  else if (evidence1 == 1) {
+    descriptionBox7.newPos();
+    descriptionBox7.update();
+    tonzilloEvidence1.newPos();
+    tonzilloEvidence1.update();
+    tonzilloEvidenceText1.newPos();
+    tonzilloEvidenceText1.update();
+  }
+  
+  /* Draw wedding ring */
+  if (!acquiredTonzilloEvidence2) {
+    switch(evidence2) {
+      case 0:
+        tonzilloEvidence2.newPos();
+        tonzilloEvidence2.update();
+        break;
+      case 1:
+        descriptionBox8.newPos();
+        descriptionBox8.update();
+        tonzilloEvidence2.newPos();
+        tonzilloEvidence2.update();
+        tonzilloEvidenceText2.newPos();
+        tonzilloEvidenceText2.update();
+        break;
+      case 2:
+        break;
+    }
+  }
+  /* Allows user to open up the description again after having collected the evidence */
+  else if (evidence2 == 1) {
+    descriptionBox8.newPos();
+    descriptionBox8.update();
+    tonzilloEvidence2.newPos();
+    tonzilloEvidence2.update();
+    tonzilloEvidenceText2.newPos();
+    tonzilloEvidenceText2.update();
+  }
+  
   /* Draw dialogue */
   switch(tonzilloDialogue) {
     case 1:
@@ -784,7 +854,7 @@ function drawScene7() {
   hillBackground.newPos();
   hillBackground.update();
 
-    /* Draw work schedule */
+  /* Draw work schedule */
   if (!acquiredHillEvidence1) {
     switch(evidence1) {
       case 0:
@@ -889,6 +959,14 @@ function drawInventory() {
   if (acquiredMyatovichEvidence2) {
     myatovichEvidence2.newPos();
     myatovichEvidence2.update();
+  }
+  if (acquiredTonzilloEvidence1) {
+    tonzilloEvidence1.newPos();
+    tonzilloEvidence1.update();
+  }
+  if (acquiredTonzilloEvidence2) {
+    tonzilloEvidence2.newPos();
+    tonzilloEvidence2.update();
   }
   if (acquiredHillEvidence1) {
     hillEvidence1.newPos();
@@ -1266,6 +1344,68 @@ function updateGameArea() {
         }
       }
     }
+    if (descriptionBox5.clicked()) {
+      if (!fadingOut && !fadingIn && sceneID == 6 && evidence1 == 1 && mouseUp) {
+        /* Close description box and add evidence to inventory */
+        evidence1 = 0;
+        acquiredTonzilloEvidence1 = true;
+        descriptionIsOpen = false;
+        
+        /* Move shoes to inventory */
+        tonzilloEvidence1.width = evidenceWidthSmall;
+        tonzilloEvidence1.height = evidenceHeightSmall;
+        tonzilloEvidence1.x = canvasWidth - 2.2*tonzilloEvidence1.width;
+        tonzilloEvidence1.y = canvasHeight/15 + 2.4*evidenceHeightSmall;
+        
+        mouseUp = false; //prevents this code block from executing again until the user releases the mouse button
+      }
+    }
+    if (tonzilloEvidence1.clicked() && !descriptionIsOpen) {
+      /* Show description of evidence */
+      if (!acquiredTonzilloEvidence1 || inventoryOpen) {
+        if (!fadingOut && !fadingIn && sceneID == 6 && tonzilloDialogue == 2 && mouseUp) {
+          tonzilloEvidence1.width = canvasWidth/4;
+          tonzilloEvidence1.height = canvasHeight/4;
+          tonzilloEvidence1.x = canvasWidth/2 - tonzilloEvidence1.width/2;
+          tonzilloEvidence1.y = canvasHeight/2 - tonzilloEvidence1.height/2 - canvasHeight/7;
+          evidence1 = 1;
+          descriptionIsOpen = true;
+
+          mouseUp = false; //prevents this code block from executing again until the user releases the mouse button
+        }
+      }
+    }
+    if (descriptionBox6.clicked()) {
+      if (!fadingOut && !fadingIn && sceneID == 6 && evidence2 == 1 && mouseUp) {
+        /* Close description box and add evidence to inventory */
+        evidence2 = 0;
+        acquiredTonzilloEvidence2 = true;
+        descriptionIsOpen = false;
+        
+        /* Move wedding ring to inventory */
+        tonzilloEvidence2.width = evidenceHeightSmall;
+        tonzilloEvidence2.height = evidenceHeightSmall;
+        tonzilloEvidence2.x = canvasWidth - 1.2*tonzilloEvidence2.width;
+        tonzilloEvidence2.y = canvasHeight/15 + 2.4*evidenceHeightSmall;
+        
+        mouseUp = false; //prevents this code block from executing again until the user releases the mouse button
+      }
+    }
+    if (tonzilloEvidence2.clicked() && !descriptionIsOpen) {
+      /* Show description of evidence */
+      if (!acquiredTonzilloEvidence2 || inventoryOpen) {
+        if (!fadingOut && !fadingIn && sceneID == 6 && tonzilloDialogue == 2 && mouseUp) {
+          tonzilloEvidence2.width = canvasWidth/6;
+          tonzilloEvidence2.height = canvasWidth/6;
+          tonzilloEvidence2.x = canvasWidth/2 - tonzilloEvidence2.width/2;
+          tonzilloEvidence2.y = canvasHeight/2 - tonzilloEvidence2.height/2 - canvasHeight/7;
+          evidence2 = 1;
+          descriptionIsOpen = true;
+
+          mouseUp = false; //prevents this code block from executing again until the user releases the mouse button
+        }
+      }
+    }
     if (descriptionBox7.clicked()) {
       if (!fadingOut && !fadingIn && sceneID == 7 && evidence1 == 1 && mouseUp) {
         /* Close description box and add evidence to inventory */
@@ -1277,7 +1417,7 @@ function updateGameArea() {
         hillEvidence1.width = evidenceWidthSmall;
         hillEvidence1.height = evidenceHeightSmall;
         hillEvidence1.x = canvasWidth - 2.2*hillEvidence1.width;
-        hillEvidence1.y = canvasHeight/15 + 3.2*evidenceHeightSmall;
+        hillEvidence1.y = canvasHeight/15 + 3.6*evidenceHeightSmall;
         
         mouseUp = false; //prevents this code block from executing again until the user releases the mouse button
       }
@@ -1308,7 +1448,7 @@ function updateGameArea() {
         hillEvidence2.width = evidenceHeightSmall;
         hillEvidence2.height = evidenceHeightSmall;
         hillEvidence2.x = canvasWidth - 1.2*hillEvidence2.width;
-        hillEvidence2.y = canvasHeight/15 + 3.2*evidenceHeightSmall;
+        hillEvidence2.y = canvasHeight/15 + 3.6*evidenceHeightSmall;
         
         mouseUp = false; //prevents this code block from executing again until the user releases the mouse button
       }
