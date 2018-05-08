@@ -8,13 +8,18 @@ var mapState = 0; //used for determining what to draw on map, depends on when th
 var displayReturn = false; //used for controlling whether or not the returnToMapButton should be displayed
 var displayMagnify = false; //used for controlling whether or not the magnifying glass icon should be displayed
 var inventoryOpen = false; //used for checking if inventory should be displayed
+var descriptionIsOpen = false; //used for checking if description is being displayed
 var acquiredCrimeEvidence1 = false; //used for displaying crime evidence 1 in the inventory
+var acquiredCrimeEvidence2 = false; //used for displaying crime evidence 2 in the inventory
+var acquiredMyatovichEvidence1 = false; //used for displaying myatovich evidence 1 in the inventory
+var acquiredMyatovichEvidence2 = false; //used for displaying myatovich evidence 2 in the inventory
 var sheriffDialogue = 1; //used for tracking what dialogue is being displayed
 var officerDialogue = 1; //used for tracking what dialogue is being displayed
 var myatovichDialogue = 1; //used for tracking what dialogue is being displayed
 var tonzilloDialogue = 1; //used for tracking what dialogue is being displayed
 var hillDialogue = 1; //used for tracking what dialogue is being displayed
-var evidence = 0; //used for tracking what evidence description is being displayed
+var evidence1 = 0; //used for tracking what evidence description is being displayed. Applies to one piece of evidence per scene.
+var evidence2 = 0; //used for tracking what evidence description is being displayed. Applies to one piece of evidence per scene.
 var mouseUp = true; //manual check for mouseup or touchend event
 var fadeAlpha = 0.0; // alpha value for fadeRect
 var fadingOut = false;
@@ -25,6 +30,9 @@ var fadeColor = "rgba(0,0,0,0)";
 var fadeRect; //covers canvas and changes alpha to create fading effects
 var dialogueBox;
 var descriptionBox1;
+var descriptionBox2;
+var descriptionBox3;
+var descriptionBox4;
 var descriptionBoxWidth = canvasWidth - canvasWidth/4;
 var descriptionBoxHeight = canvasHeight - canvasHeight/4;
 var startBackground;
@@ -54,7 +62,13 @@ var inventory;
 var mapDuckIcon;
 var crimeBackground;
 var crimeEvidence1;
+var crimeEvidence2;
+var evidenceWidthSmall = canvasWidth/9;
+var evidenceHeightSmall = canvasHeight/9;
+var evidenceWidthLarge = canvasWidth/7;
+var evidenceHeightLarge = canvasHeight/7;
 var crimeEvidenceText1;
+var crimeEvidenceText2;
 var crimeText1;
 var crimeText2;
 var crimeText3;
@@ -63,6 +77,10 @@ var crimeText5;
 var crimeText6;
 var crimeText7;
 var mapMyatovichIcon;
+var myatovichEvidence1;
+var myatovichEvidence2;
+var myatovichEvidenceText1;
+var myatovichEvidenceText2;
 var mapTonzilloIcon;
 var mapHillIcon;
 var myatovichBackground;
@@ -81,7 +99,10 @@ var suspectHeight = 150;
 function startGame() {
   fadeRect = new component(canvasWidth, canvasHeight, fadeColor, 0, 0); 
   dialogueBox = new component(canvasWidth, canvasHeight/3, "assets/images/000000-0.5.png", 0, canvasHeight - canvasHeight/3, "image");
-  descriptionBox1 = new component(descriptionBoxWidth, descriptionBoxHeight, "assets/images/000000-0.5.png", canvasWidth/2 - descriptionBoxWidth/2, canvasHeight/2 - canvasHeight/3, "image", "shotgun_shells");
+  descriptionBox1 = new component(descriptionBoxWidth, descriptionBoxHeight, "assets/images/000000-0.5.png", canvasWidth/2 - descriptionBoxWidth/2, canvasHeight/2 - canvasHeight/3, "image");
+  descriptionBox2 = new component(descriptionBoxWidth, descriptionBoxHeight, "assets/images/000000-0.5.png", canvasWidth/2 - descriptionBoxWidth/2, canvasHeight/2 - canvasHeight/3, "image");
+  descriptionBox3 = new component(descriptionBoxWidth, descriptionBoxHeight, "assets/images/000000-0.5.png", canvasWidth/2 - descriptionBoxWidth/2, canvasHeight/2 - canvasHeight/3, "image");
+  descriptionBox4 = new component(descriptionBoxWidth, descriptionBoxHeight, "assets/images/000000-0.5.png", canvasWidth/2 - descriptionBoxWidth/2, canvasHeight/2 - canvasHeight/3, "image");
   returnToMapButton = new component(returnToMapButtonWidth, returnToMapButtonHeight, "assets/images/crystal-button.png", canvasWidth/12, canvasHeight/20, "image");
   returnToMapText = new component("24px", "Arial", "black", canvasWidth/10, canvasHeight/9, "text");
   returnToMapText.text = "[Return to map]";
@@ -119,9 +140,12 @@ function startGame() {
   
   /* Crime scene */
   crimeBackground = new component(canvasWidth, canvasHeight, "assets/images/duckisland.jpg", 0, 0, "image");
-  crimeEvidence1 = new component(canvasHeight/9, canvasHeight/9, "assets/images/shotgun_shells.png", canvasWidth - canvasWidth/4, canvasHeight/2 + canvasHeight/6, "image");
+  crimeEvidence1 = new component(evidenceHeightSmall, evidenceHeightSmall, "assets/images/shotgun_shells.png", canvasWidth - canvasWidth/4, canvasHeight/2 + canvasHeight/6, "image");
   crimeEvidenceText1 = new component("24px", "Arial", "white", canvasWidth/6, canvasHeight/2 + canvasHeight/6, "text");
   crimeEvidenceText1.text = "A couple of spent shotgun shells. This tells us what\nweapon the murderer used.";
+  crimeEvidence2 = new component(evidenceWidthLarge, evidenceHeightLarge, "assets/images/car.png", canvasWidth - canvasWidth/2, canvasHeight/2 + canvasHeight/10, "image");
+  crimeEvidenceText2 = new component("24px", "Arial", "white", canvasWidth/6, canvasHeight/2 + canvasHeight/6, "text");
+  crimeEvidenceText2.text = "The car in which the couple were killed. There is a handprint on\nthe side of the door. It could belong to the killer.";
   crimeText1 = new component("24px", "Arial", "white", canvasWidth/9, canvasHeight/2 + canvasHeight/4, "text");
   crimeText1.text = "Officer 2:\nIt appears our victims were a young couple named Vincenzo 'Jim'\nTonzillo and Mary Myatovich. Jim was a 20-year-old man married,\nhaving an affair with Mary Myatovich. And Mary Myatovich was a 15-year-old girl.\nShe was unmarried.";
   crimeText2 = new component("24px", "Arial", "white", canvasWidth/9, canvasHeight/2 + canvasHeight/4, "text");
@@ -139,6 +163,12 @@ function startGame() {
   
   /* Myatovich suspect scene */
   myatovichBackground = new component(canvasWidth, canvasHeight, "assets/images/bedroom.jpg", 0, 0, "image");
+  myatovichEvidence1 = new component(evidenceHeightSmall, evidenceHeightSmall, "assets/images/gift_and_card_sepia.png", canvasWidth/2 - canvasWidth/4, canvasHeight/2 - canvasHeight/5, "image");
+  myatovichEvidenceText1 = new component("24px", "Arial", "white", canvasWidth/6, canvasHeight/2 + canvasHeight/6, "text");
+  myatovichEvidenceText1.text = "A card and gift for Mr. Myatovich’s daughter. Her birthday\nwas in a few days. It is signed by Mr. Myatovich.";
+  myatovichEvidence2 = new component(evidenceWidthSmall, evidenceHeightSmall, "assets/images/gloves.png", canvasWidth/2 + canvasWidth/4, canvasHeight/2 - canvasHeight/8, "image");
+  myatovichEvidenceText2 = new component("24px", "Arial", "white", canvasWidth/6, canvasHeight/2 + canvasHeight/6, "text");
+  myatovichEvidenceText2.text = "These are Mr. Myatovich’s leather gloves. They are about the\nsame size as the handprint found at the scene of the crime.";
   myatovichText1 = new component("24px", "Arial", "white", canvasWidth/6, canvasHeight/2 + canvasHeight/4, "text");
   myatovichText1.text = "Mr. Myatovich:\nSure, I was upset, but I would never hurt my little girl.";
   myatovichSuspect = new component(suspectWidth, suspectHeight, "assets/images/suspectdad.png", 0, canvasHeight - suspectHeight, "image");
@@ -198,14 +228,11 @@ var myGameArea = {
 }
 
 /* Constructor for game components */
-function component(width, height, color, x, y, type, id) {
+function component(width, height, color, x, y, type) {
   this.type = type;
   if (type == "image") {
     this.image = new Image();
     this.image.src = color;
-  }
-  if (id) {
-    this.id = id;
   }
   this.width = width;
   this.height = height;
@@ -330,6 +357,7 @@ function drawScene2() {
   mapBackground.newPos();
   mapBackground.update();
   
+  /* Draw map icons */
   switch(mapState) {
     case 0:
       mapStationIcon.newPos();
@@ -354,6 +382,7 @@ function drawScene2() {
       mapHillIcon.update();
   }
   
+  /* Draw magnifying glass icon */
   if (displayMagnify) {
     magnifyingIcon.newPos();
     magnifyingIcon.update();
@@ -366,6 +395,7 @@ function drawScene3() {
   stationBackground.update();
   
   if (gameState == gameStates.visited_suspects) {
+    /* Draw dialogue */
     switch(sheriffDialogue) {
       case 1:
         dialogueBox.newPos();
@@ -377,6 +407,7 @@ function drawScene3() {
         break;
     }
     
+    /* Draw magnifying glass icon */
     if (displayMagnify) {
       magnifyingIcon.newPos();
       magnifyingIcon.update();
@@ -388,7 +419,7 @@ function drawScene3() {
     sheriffText1.newPos();
     sheriffText1.update();
   }
-  
+  /* Draw returnToMapButton */
   if (displayReturn) {
     returnToMapButton.newPos();
     returnToMapButton.update();
@@ -402,23 +433,65 @@ function drawScene4() {
   crimeBackground.newPos();
   crimeBackground.update();
   
-  switch(evidence) {
-    case 0:
-      crimeEvidence1.newPos();
-      crimeEvidence1.update();
-      break;
-    case 1:
-      descriptionBox1.newPos();
-      descriptionBox1.update();
-      crimeEvidence1.newPos();
-      crimeEvidence1.update();
-      crimeEvidenceText1.newPos();
-      crimeEvidenceText1.update();
-      break;
-    case 2:
-      break;
+  /* Draw shotgun shells */
+  if (!acquiredCrimeEvidence1) {
+    switch(evidence1) {
+      case 0:
+        crimeEvidence1.newPos();
+        crimeEvidence1.update();
+        break;
+      case 1:
+        descriptionBox1.newPos();
+        descriptionBox1.update();
+        crimeEvidence1.newPos();
+        crimeEvidence1.update();
+        crimeEvidenceText1.newPos();
+        crimeEvidenceText1.update();
+        break;
+      case 2:
+        break;
+    }
+  }
+  /* Allows user to open up the description again after having collected the evidence */
+  else if (evidence1 == 1) {
+    descriptionBox1.newPos();
+    descriptionBox1.update();
+    crimeEvidence1.newPos();
+    crimeEvidence1.update();
+    crimeEvidenceText1.newPos();
+    crimeEvidenceText1.update();
   }
   
+  /* Draw car */
+  if (!acquiredCrimeEvidence2) {
+    switch(evidence2) {
+      case 0:
+        crimeEvidence2.newPos();
+        crimeEvidence2.update();
+        break;
+      case 1:
+        descriptionBox2.newPos();
+        descriptionBox2.update();
+        crimeEvidence2.newPos();
+        crimeEvidence2.update();
+        crimeEvidenceText2.newPos();
+        crimeEvidenceText2.update();
+        break;
+      case 2:
+        break;
+    }
+  }
+  /* Allows user to open up the description again after having collected the evidence */
+  else if (evidence2 == 1) {
+    descriptionBox2.newPos();
+    descriptionBox2.update();
+    crimeEvidence2.newPos();
+    crimeEvidence2.update();
+    crimeEvidenceText2.newPos();
+    crimeEvidenceText2.update();
+  }
+  
+  /* Draw dialogue */
   switch(officerDialogue) {
     case 1:
       dialogueBox.newPos();
@@ -466,10 +539,12 @@ function drawScene4() {
       break;
   }
   
+  /* Draw magnifying glass icon */
   if (displayMagnify) {
     magnifyingIcon.newPos();
     magnifyingIcon.update();
   }
+  /* Draw returnToMapButton */
   if (displayReturn) {
     returnToMapButton.newPos();
     returnToMapButton.update();
@@ -483,6 +558,65 @@ function drawScene5() {
   myatovichBackground.newPos();
   myatovichBackground.update();
   
+  /* Draw gift and card */
+  if (!acquiredMyatovichEvidence1) {
+    switch(evidence1) {
+      case 0:
+        myatovichEvidence1.newPos();
+        myatovichEvidence1.update();
+        break;
+      case 1:
+        descriptionBox3.newPos();
+        descriptionBox3.update();
+        myatovichEvidence1.newPos();
+        myatovichEvidence1.update();
+        myatovichEvidenceText1.newPos();
+        myatovichEvidenceText1.update();
+        break;
+      case 2:
+        break;
+    }
+  }
+  /* Allows user to open up the description again after having collected the evidence */
+  else if (evidence1 == 1) {
+    descriptionBox3.newPos();
+    descriptionBox3.update();
+    myatovichEvidence1.newPos();
+    myatovichEvidence1.update();
+    myatovichEvidenceText1.newPos();
+    myatovichEvidenceText1.update();
+  }
+  
+  /* Draw gloves */
+  if (!acquiredMyatovichEvidence2) {
+    switch(evidence2) {
+      case 0:
+        myatovichEvidence2.newPos();
+        myatovichEvidence2.update();
+        break;
+      case 1:
+        descriptionBox4.newPos();
+        descriptionBox4.update();
+        myatovichEvidence2.newPos();
+        myatovichEvidence2.update();
+        myatovichEvidenceText2.newPos();
+        myatovichEvidenceText2.update();
+        break;
+      case 2:
+        break;
+    }
+  }
+  /* Allows user to open up the description again after having collected the evidence */
+  else if (evidence1 == 1) {
+    descriptionBox4.newPos();
+    descriptionBox4.update();
+    myatovichEvidence2.newPos();
+    myatovichEvidence2.update();
+    myatovichEvidenceText2.newPos();
+    myatovichEvidenceText2.update();
+  }
+  
+  /* Draw dialogue */
   switch(myatovichDialogue) {
     case 1:
       dialogueBox.newPos();
@@ -497,10 +631,12 @@ function drawScene5() {
       break;
   }
   
+  /* Draw magnifying glass icon */
   if (displayMagnify) {
     magnifyingIcon.newPos();
     magnifyingIcon.update();
   }
+  /* Draw returnToMapButton */
   if (displayReturn) {
     returnToMapButton.newPos();
     returnToMapButton.update();
@@ -514,6 +650,7 @@ function drawScene6() {
   tonzilloBackground.newPos();
   tonzilloBackground.update();
   
+  /* Draw dialogue */
   switch(tonzilloDialogue) {
     case 1:
       dialogueBox.newPos();
@@ -528,10 +665,12 @@ function drawScene6() {
       break;
   }
   
+  /* Draw magnifying glass icon */
   if (displayMagnify) {
     magnifyingIcon.newPos();
     magnifyingIcon.update();
   }
+  /* Draw returnToMapButton */
   if (displayReturn) {
     returnToMapButton.newPos();
     returnToMapButton.update();
@@ -545,6 +684,7 @@ function drawScene7() {
   hillBackground.newPos();
   hillBackground.update();
 
+  /* Draw dialogue */
   switch(hillDialogue) {
     case 1:
       dialogueBox.newPos();
@@ -559,10 +699,12 @@ function drawScene7() {
       break;
   }
   
+  /* Draw magnifying glass icon */
   if (displayMagnify) {
     magnifyingIcon.newPos();
     magnifyingIcon.update();
   }
+  /* Draw returnToMapButton */
   if (displayReturn) {
     returnToMapButton.newPos();
     returnToMapButton.update();
@@ -577,6 +719,18 @@ function drawInventory() {
   if (acquiredCrimeEvidence1) {
     crimeEvidence1.newPos();
     crimeEvidence1.update();
+  }
+  if (acquiredCrimeEvidence2) {
+    crimeEvidence2.newPos();
+    crimeEvidence2.update();
+  }
+  if (acquiredMyatovichEvidence1) {
+    myatovichEvidence1.newPos();
+    myatovichEvidence1.update();
+  }
+  if (acquiredMyatovichEvidence2) {
+    myatovichEvidence2.newPos();
+    myatovichEvidence2.update();
   }
 }
 
@@ -625,7 +779,12 @@ function updateGameArea() {
       case 3:
         if (sheriffDialogue > 1) {
           displayMagnify = true;
-          displayReturn = true;
+          if (!descriptionIsOpen) {
+            displayReturn = true;
+          }
+          else {
+            displayReturn = false;
+          }
         }
         else {
           displayMagnify = false;
@@ -635,7 +794,12 @@ function updateGameArea() {
       case 4:
         if (officerDialogue > 7) {
           displayMagnify = true;
-          displayReturn = true;
+          if (!descriptionIsOpen) {
+            displayReturn = true;
+          }
+          else {
+            displayReturn = false;
+          }
         }
         else {
           displayMagnify = false;
@@ -645,7 +809,12 @@ function updateGameArea() {
       case 5:
         if (myatovichDialogue > 1) {
           displayMagnify = true;
-          displayReturn = true;
+          if (!descriptionIsOpen) {
+            displayReturn = true;
+          }
+          else {
+            displayReturn = false;
+          }
         }
         else {
           displayMagnify = false;
@@ -655,7 +824,12 @@ function updateGameArea() {
       case 6:
         if (tonzilloDialogue > 1) {
           displayMagnify = true;
-          displayReturn = true;
+          if (!descriptionIsOpen) {
+            displayReturn = true;
+          }
+          else {
+            displayReturn = false;
+          }
         }
         else {
           displayMagnify = false;
@@ -665,7 +839,12 @@ function updateGameArea() {
       case 7:
         if (hillDialogue > 1) {
           displayMagnify = true;
-          displayReturn = true;
+          if (!descriptionIsOpen) {
+            displayReturn = true;
+          }
+          else {
+            displayReturn = false;
+          }
         }
         else {
           displayMagnify = false;
@@ -697,6 +876,7 @@ function updateGameArea() {
         fadingOut = true;
         nextScene = 3;
         sheriffDialogue = 1;
+        inventoryOpen = false;
       }
     }
     if (returnToMapButton.clicked()) {
@@ -707,16 +887,21 @@ function updateGameArea() {
         if (gameState == gameStates.intro) {
           gameState = gameStates.sheriff_debrief;
         }
+        inventoryOpen = false;
       }
+      /* fade crime scene to map scene */
       if (!fadingOut && !fadingIn && sceneID == 4 && displayReturn) {
         fadingOut = true;
         nextScene = 2;
         gameState = gameStates.visited_crimescene;
+        inventoryOpen = false;
       }
+      /* fade suspect scene to map scene */
       if (!fadingOut && !fadingIn && sceneID > 4 && displayReturn) {
         fadingOut = true;
         nextScene = 2;
         gameState = gameStates.visited_suspects;
+        inventoryOpen = false;
       }
     }
     if (mapDuckIcon.clicked()) {
@@ -724,6 +909,7 @@ function updateGameArea() {
       if (!fadingOut && !fadingIn && sceneID == 2 && (gameState == gameStates.sheriff_debrief || gameState == gameStates.visited_crimescene || gameState == gameStates.visited_suspects)) {
         fadingOut = true;
         nextScene = 4;
+        inventoryOpen = false;
       } 
     }
     if (mapMyatovichIcon.clicked()) {
@@ -731,6 +917,7 @@ function updateGameArea() {
       if (!fadingOut && !fadingIn && sceneID == 2) {
         fadingOut = true;
         nextScene = 5;
+        inventoryOpen = false;
       }
     }
     if (mapTonzilloIcon.clicked()) {
@@ -738,6 +925,7 @@ function updateGameArea() {
       if (!fadingOut && !fadingIn && sceneID == 2) {
         fadingOut = true;
         nextScene = 6;
+        inventoryOpen = false;
       }
     }
     if (mapHillIcon.clicked()) {
@@ -745,6 +933,7 @@ function updateGameArea() {
       if (!fadingOut && !fadingIn && sceneID == 2) {
         fadingOut = true;
         nextScene = 7;
+        inventoryOpen = false;
       }
     }    
     if (dialogueBox.clicked()) {
@@ -788,28 +977,118 @@ function updateGameArea() {
       }
     }
     if (descriptionBox1.clicked()) {
-      if (!fadingOut && !fadingIn && sceneID == 4 && evidence == 1 && mouseUp) {
+      if (!fadingOut && !fadingIn && sceneID == 4 && evidence1 == 1 && mouseUp) {
         /* Close description box and add evidence to inventory */
-        evidence = 2;
-        
-        //add shotgun shells to inventory
-        crimeEvidence1.width = canvasHeight/9;
-        crimeEvidence1.height = canvasHeight/9;
-        crimeEvidence1.x = canvasWidth - crimeEvidence1.width;
-        crimeEvidence1.y = canvasHeight/15;
+        evidence1 = 0;
         acquiredCrimeEvidence1 = true;
+        descriptionIsOpen = false;
+        
+        /* Move shotgun shells to inventory */
+        crimeEvidence1.width = evidenceHeightSmall;
+        crimeEvidence1.height = evidenceHeightSmall;
+        crimeEvidence1.x = canvasWidth - 1.2*crimeEvidence1.width;
+        crimeEvidence1.y = canvasHeight/15;
         
         mouseUp = false; //prevents this code block from executing again until the user releases the mouse button
       }
     }
-    if (crimeEvidence1.clicked()) {
+    if (crimeEvidence1.clicked() && !descriptionIsOpen) {
       /* Show description of evidence */
       if (!fadingOut && !fadingIn && sceneID == 4 && officerDialogue == 8 && mouseUp) {
         crimeEvidence1.width = canvasWidth/6;
         crimeEvidence1.height = canvasWidth/6;
         crimeEvidence1.x = canvasWidth/2 - crimeEvidence1.width/2;
         crimeEvidence1.y = canvasHeight/2 - crimeEvidence1.height/2 - canvasHeight/7;
-        evidence = 1;
+        evidence1 = 1;
+        descriptionIsOpen = true;
+        
+        mouseUp = false; //prevents this code block from executing again until the user releases the mouse button
+      }
+    }
+    if (descriptionBox2.clicked()) {
+      if (!fadingOut && !fadingIn && sceneID == 4 && evidence2 == 1 && mouseUp) {
+        /* Close description box and add evidence to inventory */
+        evidence2 = 0;
+        acquiredCrimeEvidence2 = true;
+        descriptionIsOpen = false;
+        
+        /* Move car to inventory */
+        crimeEvidence2.width = evidenceWidthSmall;
+        crimeEvidence2.height = evidenceHeightSmall;
+        crimeEvidence2.x = canvasWidth - 2.2*crimeEvidence2.width;
+        crimeEvidence2.y = canvasHeight/15;
+        
+        mouseUp = false; //prevents this code block from executing again until the user releases the mouse button
+      }
+    }
+    if (crimeEvidence2.clicked() && !descriptionIsOpen) {
+      /* Show description of evidence */
+      if (!fadingOut && !fadingIn && sceneID == 4 && officerDialogue == 8 && mouseUp) {
+        crimeEvidence2.width = canvasWidth/4;
+        crimeEvidence2.height = canvasHeight/4;
+        crimeEvidence2.x = canvasWidth/2 - crimeEvidence2.width/2;
+        crimeEvidence2.y = canvasHeight/2 - crimeEvidence2.height/2 - canvasHeight/7;
+        evidence2 = 1;
+        descriptionIsOpen = true;
+        
+        mouseUp = false; //prevents this code block from executing again until the user releases the mouse button
+      }
+    }
+    if (descriptionBox3.clicked()) {
+      if (!fadingOut && !fadingIn && sceneID == 5 && evidence1 == 1 && mouseUp) {
+        /* Close description box and add evidence to inventory */
+        evidence1 = 0;
+        acquiredMyatovichEvidence1 = true;
+        descriptionIsOpen = false;
+        
+        /* Move gift and card to inventory */
+        myatovichEvidence1.width = evidenceHeightSmall;
+        myatovichEvidence1.height = evidenceHeightSmall;
+        myatovichEvidence1.x = canvasWidth - 1.2*myatovichEvidence1.width;
+        myatovichEvidence1.y = canvasHeight/15 + 1.2*evidenceHeightSmall;
+        
+        mouseUp = false; //prevents this code block from executing again until the user releases the mouse button
+      }
+    }
+    if (myatovichEvidence1.clicked() && !descriptionIsOpen) {
+      /* Show description of evidence */
+      if (!fadingOut && !fadingIn && sceneID == 5 && myatovichDialogue == 2 && mouseUp) {
+        myatovichEvidence1.image.src = "assets/images/gift_and_card.png";
+        myatovichEvidence1.width = canvasWidth/5;
+        myatovichEvidence1.height = canvasWidth/5;
+        myatovichEvidence1.x = canvasWidth/2 - myatovichEvidence1.width/2;
+        myatovichEvidence1.y = canvasHeight/2 - myatovichEvidence1.height/2 - canvasHeight/7;
+        evidence1 = 1;
+        descriptionIsOpen = true;
+        
+        mouseUp = false; //prevents this code block from executing again until the user releases the mouse button
+      }
+    }
+    if (descriptionBox4.clicked()) {
+      if (!fadingOut && !fadingIn && sceneID == 5 && evidence2 == 1 && mouseUp) {
+        /* Close description box and add evidence to inventory */
+        evidence2 = 0;
+        acquiredMyatovichEvidence2 = true;
+        descriptionIsOpen = false;
+        
+        /* Move gloves to inventory */
+        myatovichEvidence2.width = evidenceWidthSmall;
+        myatovichEvidence2.height = evidenceHeightSmall;
+        myatovichEvidence2.x = canvasWidth - 2.2*myatovichEvidence2.width;
+        myatovichEvidence2.y = canvasHeight/15 + 1.2*evidenceHeightSmall;
+        
+        mouseUp = false; //prevents this code block from executing again until the user releases the mouse button
+      }
+    }
+    if (myatovichEvidence2.clicked() && !descriptionIsOpen) {
+      /* Show description of evidence */
+      if (!fadingOut && !fadingIn && sceneID == 5 && myatovichDialogue == 2 && mouseUp) {
+        myatovichEvidence2.width = canvasWidth/5;
+        myatovichEvidence2.height = canvasHeight/5;
+        myatovichEvidence2.x = canvasWidth/2 - myatovichEvidence2.width/2;
+        myatovichEvidence2.y = canvasHeight/2 - myatovichEvidence2.height/2 - canvasHeight/7;
+        evidence2 = 1;
+        descriptionIsOpen = true;
         
         mouseUp = false; //prevents this code block from executing again until the user releases the mouse button
       }
