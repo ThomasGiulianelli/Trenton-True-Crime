@@ -13,6 +13,8 @@ var acquiredCrimeEvidence1 = false; //used for displaying crime evidence 1 in th
 var acquiredCrimeEvidence2 = false; //used for displaying crime evidence 2 in the inventory
 var acquiredMyatovichEvidence1 = false; //used for displaying myatovich evidence 1 in the inventory
 var acquiredMyatovichEvidence2 = false; //used for displaying myatovich evidence 2 in the inventory
+var acquiredHillEvidence1 = false; //used for displaying hill evidence 1 in the inventory
+var acquiredHillEvidence2 = false; //used for displaying hill evidence 2 in the inventory
 var sheriffDialogue = 1; //used for tracking what dialogue is being displayed
 var officerDialogue = 1; //used for tracking what dialogue is being displayed
 var myatovichDialogue = 1; //used for tracking what dialogue is being displayed
@@ -34,6 +36,10 @@ var descriptionBox1;
 var descriptionBox2;
 var descriptionBox3;
 var descriptionBox4;
+var descriptionBox5;
+var descriptionBox6;
+var descriptionBox7;
+var descriptionBox8;
 var descriptionBoxWidth = canvasWidth - canvasWidth/4;
 var descriptionBoxHeight = canvasHeight - canvasHeight/4;
 var startBackground;
@@ -81,21 +87,25 @@ var crimeText5;
 var crimeText6;
 var crimeText7;
 var mapMyatovichIcon;
+var myatovichBackground;
+var myatovichText1;
+var myatovichSuspect;
 var myatovichEvidence1;
 var myatovichEvidence2;
 var myatovichEvidenceText1;
 var myatovichEvidenceText2;
 var mapTonzilloIcon;
-var mapHillIcon;
-var myatovichBackground;
-var myatovichText1;
-var myatovichSuspect;
 var tonzilloBackground;
 var tonzilloText1;
 var tonzilloSuspect;
+var mapHillIcon;
 var hillBackground;
 var hillText1;
 var hillSuspect;
+var hillEvidence1;
+var hillEvidence2;
+var hillEvidenceText1;
+var hillEvidenceText2;
 var suspectWidth = canvasWidth/4;
 var suspectHeight = canvasHeight/3;
 var choiceBox1;
@@ -120,6 +130,10 @@ function startGame() {
   descriptionBox2 = new component(descriptionBoxWidth, descriptionBoxHeight, "assets/images/000000-0.5.png", canvasWidth/2 - descriptionBoxWidth/2, canvasHeight/2 - canvasHeight/3, "image");
   descriptionBox3 = new component(descriptionBoxWidth, descriptionBoxHeight, "assets/images/000000-0.5.png", canvasWidth/2 - descriptionBoxWidth/2, canvasHeight/2 - canvasHeight/3, "image");
   descriptionBox4 = new component(descriptionBoxWidth, descriptionBoxHeight, "assets/images/000000-0.5.png", canvasWidth/2 - descriptionBoxWidth/2, canvasHeight/2 - canvasHeight/3, "image");
+  descriptionBox5 = new component(descriptionBoxWidth, descriptionBoxHeight, "assets/images/000000-0.5.png", canvasWidth/2 - descriptionBoxWidth/2, canvasHeight/2 - canvasHeight/3, "image");
+  descriptionBox6 = new component(descriptionBoxWidth, descriptionBoxHeight, "assets/images/000000-0.5.png", canvasWidth/2 - descriptionBoxWidth/2, canvasHeight/2 - canvasHeight/3, "image");
+  descriptionBox7 = new component(descriptionBoxWidth, descriptionBoxHeight, "assets/images/000000-0.5.png", canvasWidth/2 - descriptionBoxWidth/2, canvasHeight/2 - canvasHeight/3, "image");
+  descriptionBox8 = new component(descriptionBoxWidth, descriptionBoxHeight, "assets/images/000000-0.5.png", canvasWidth/2 - descriptionBoxWidth/2, canvasHeight/2 - canvasHeight/3, "image");
   returnToMapButton = new component(returnToMapButtonWidth, returnToMapButtonHeight, "assets/images/crystal-button.png", canvasWidth/12, canvasHeight/20, "image");
   returnToMapText = new component("24px", "Arial", "black", canvasWidth/10, canvasHeight/9, "text");
   returnToMapText.text = "[Return to map]";
@@ -218,6 +232,12 @@ function startGame() {
   
   /* Hill suspect scene */
   hillBackground = new component(canvasWidth, canvasHeight, "assets/images/factory.jpg", 0, 0, "image");
+  hillEvidence1 = new component(evidenceWidthSmall, evidenceHeightSmall, "assets/images/work-schedule.jpg", canvasWidth - canvasWidth/5, canvasHeight/2 - evidenceHeightSmall, "image");
+  hillEvidenceText1 = new component("24px", "Arial", "white", canvasWidth/6, canvasHeight/2 + canvasHeight/6, "text");
+  hillEvidenceText1.text = "This is Mr. Hill’s work schedule. He told us he was working the\nnight of the murder, but according to this he was off that day.";
+  hillEvidence2 = new component(evidenceHeightSmall, evidenceHeightSmall, "assets/images/diary.png", evidenceHeightSmall, canvasHeight/2, "image");
+  hillEvidenceText2 = new component("24px", "Arial", "white", canvasWidth/5, canvasHeight/2 + canvasHeight/8, "text");
+  hillEvidenceText2.text = "This is Mr. Hill’s personal journal. There are a few entries in it\nthat talk about the victim, Jim, in a poor light. One quote reads\n“Jim didn’t stop talking about how he is cheating on his wife\nwith another woman today. The other woman is years\nyounger than him and his poor wife is pregnant. He keeps\nbragging about it as if I want to know his business. His whole\nlifestyle is against God if you ask me.”";
   hillText1 = new component("24px", "Arial", "white", canvasWidth/5, canvasHeight/2 + canvasHeight/4, "text");
   hillText1.text = "Mr. Hill:\nYeah, I worked with Jim, he was a fine guy and all,\nhe just talked about himself mostly. But, I couldn’t have done\nthe murder, I was down at the factory when it happened.";
   hillSuspect = new component(suspectWidth, suspectHeight, "assets/images/suspectkiller.png", 0, canvasHeight - suspectHeight, "image");
@@ -687,7 +707,7 @@ function drawScene5() {
     }
   }
   /* Allows user to open up the description again after having collected the evidence */
-  else if (evidence1 == 1) {
+  else if (evidence2 == 1) {
     descriptionBox4.newPos();
     descriptionBox4.update();
     myatovichEvidence2.newPos();
@@ -764,6 +784,64 @@ function drawScene7() {
   hillBackground.newPos();
   hillBackground.update();
 
+    /* Draw work schedule */
+  if (!acquiredHillEvidence1) {
+    switch(evidence1) {
+      case 0:
+        hillEvidence1.newPos();
+        hillEvidence1.update();
+        break;
+      case 1:
+        descriptionBox7.newPos();
+        descriptionBox7.update();
+        hillEvidence1.newPos();
+        hillEvidence1.update();
+        hillEvidenceText1.newPos();
+        hillEvidenceText1.update();
+        break;
+      case 2:
+        break;
+    }
+  }
+  /* Allows user to open up the description again after having collected the evidence */
+  else if (evidence1 == 1) {
+    descriptionBox7.newPos();
+    descriptionBox7.update();
+    hillEvidence1.newPos();
+    hillEvidence1.update();
+    hillEvidenceText1.newPos();
+    hillEvidenceText1.update();
+  }
+  
+  /* Draw journal */
+  if (!acquiredHillEvidence2) {
+    switch(evidence2) {
+      case 0:
+        hillEvidence2.newPos();
+        hillEvidence2.update();
+        break;
+      case 1:
+        descriptionBox8.newPos();
+        descriptionBox8.update();
+        hillEvidence2.newPos();
+        hillEvidence2.update();
+        hillEvidenceText2.newPos();
+        hillEvidenceText2.update();
+        break;
+      case 2:
+        break;
+    }
+  }
+  /* Allows user to open up the description again after having collected the evidence */
+  else if (evidence2 == 1) {
+    descriptionBox8.newPos();
+    descriptionBox8.update();
+    hillEvidence2.newPos();
+    hillEvidence2.update();
+    hillEvidenceText2.newPos();
+    hillEvidenceText2.update();
+  }
+  
   /* Draw dialogue */
   switch(hillDialogue) {
     case 1:
@@ -811,6 +889,14 @@ function drawInventory() {
   if (acquiredMyatovichEvidence2) {
     myatovichEvidence2.newPos();
     myatovichEvidence2.update();
+  }
+  if (acquiredHillEvidence1) {
+    hillEvidence1.newPos();
+    hillEvidence1.update();
+  }
+  if (acquiredHillEvidence2) {
+    hillEvidence2.newPos();
+    hillEvidence2.update();
   }
 }
 
@@ -1073,15 +1159,17 @@ function updateGameArea() {
     }
     if (crimeEvidence1.clicked() && !descriptionIsOpen) {
       /* Show description of evidence */
-      if (!fadingOut && !fadingIn && sceneID == 4 && officerDialogue == 8 && mouseUp) {
-        crimeEvidence1.width = canvasWidth/6;
-        crimeEvidence1.height = canvasWidth/6;
-        crimeEvidence1.x = canvasWidth/2 - crimeEvidence1.width/2;
-        crimeEvidence1.y = canvasHeight/2 - crimeEvidence1.height/2 - canvasHeight/7;
-        evidence1 = 1;
-        descriptionIsOpen = true;
-        
-        mouseUp = false; //prevents this code block from executing again until the user releases the mouse button
+      if (!acquiredCrimeEvidence1 || inventoryOpen) {
+        if (!fadingOut && !fadingIn && sceneID == 4 && officerDialogue == 8 && mouseUp) {
+          crimeEvidence1.width = canvasWidth/6;
+          crimeEvidence1.height = canvasWidth/6;
+          crimeEvidence1.x = canvasWidth/2 - crimeEvidence1.width/2;
+          crimeEvidence1.y = canvasHeight/2 - crimeEvidence1.height/2 - canvasHeight/7;
+          evidence1 = 1;
+          descriptionIsOpen = true;
+
+          mouseUp = false; //prevents this code block from executing again until the user releases the mouse button
+        }
       }
     }
     if (descriptionBox2.clicked()) {
@@ -1102,15 +1190,17 @@ function updateGameArea() {
     }
     if (crimeEvidence2.clicked() && !descriptionIsOpen) {
       /* Show description of evidence */
-      if (!fadingOut && !fadingIn && sceneID == 4 && officerDialogue == 8 && mouseUp) {
-        crimeEvidence2.width = canvasWidth/4;
-        crimeEvidence2.height = canvasHeight/4;
-        crimeEvidence2.x = canvasWidth/2 - crimeEvidence2.width/2;
-        crimeEvidence2.y = canvasHeight/2 - crimeEvidence2.height/2 - canvasHeight/7;
-        evidence2 = 1;
-        descriptionIsOpen = true;
-        
-        mouseUp = false; //prevents this code block from executing again until the user releases the mouse button
+      if (!acquiredCrimeEvidence2 || inventoryOpen) {  
+        if (!fadingOut && !fadingIn && sceneID == 4 && officerDialogue == 8 && mouseUp) {
+          crimeEvidence2.width = canvasWidth/4;
+          crimeEvidence2.height = canvasHeight/4;
+          crimeEvidence2.x = canvasWidth/2 - crimeEvidence2.width/2;
+          crimeEvidence2.y = canvasHeight/2 - crimeEvidence2.height/2 - canvasHeight/7;
+          evidence2 = 1;
+          descriptionIsOpen = true;
+
+          mouseUp = false; //prevents this code block from executing again until the user releases the mouse button
+        }
       }
     }
     if (descriptionBox3.clicked()) {
@@ -1131,16 +1221,18 @@ function updateGameArea() {
     }
     if (myatovichEvidence1.clicked() && !descriptionIsOpen) {
       /* Show description of evidence */
-      if (!fadingOut && !fadingIn && sceneID == 5 && myatovichDialogue == 2 && mouseUp) {
-        myatovichEvidence1.image.src = "assets/images/gift_and_card.png";
-        myatovichEvidence1.width = canvasWidth/5;
-        myatovichEvidence1.height = canvasWidth/5;
-        myatovichEvidence1.x = canvasWidth/2 - myatovichEvidence1.width/2;
-        myatovichEvidence1.y = canvasHeight/2 - myatovichEvidence1.height/2 - canvasHeight/7;
-        evidence1 = 1;
-        descriptionIsOpen = true;
-        
-        mouseUp = false; //prevents this code block from executing again until the user releases the mouse button
+      if (!acquiredMyatovichEvidence1 || inventoryOpen) {
+        if (!fadingOut && !fadingIn && sceneID == 5 && myatovichDialogue == 2 && mouseUp) {
+          myatovichEvidence1.image.src = "assets/images/gift_and_card.png";
+          myatovichEvidence1.width = canvasWidth/5;
+          myatovichEvidence1.height = canvasWidth/5;
+          myatovichEvidence1.x = canvasWidth/2 - myatovichEvidence1.width/2;
+          myatovichEvidence1.y = canvasHeight/2 - myatovichEvidence1.height/2 - canvasHeight/7;
+          evidence1 = 1;
+          descriptionIsOpen = true;
+
+          mouseUp = false; //prevents this code block from executing again until the user releases the mouse button
+        }
       }
     }
     if (descriptionBox4.clicked()) {
@@ -1161,18 +1253,82 @@ function updateGameArea() {
     }
     if (myatovichEvidence2.clicked() && !descriptionIsOpen) {
       /* Show description of evidence */
-      if (!fadingOut && !fadingIn && sceneID == 5 && myatovichDialogue == 2 && mouseUp) {
-        myatovichEvidence2.width = canvasWidth/5;
-        myatovichEvidence2.height = canvasHeight/5;
-        myatovichEvidence2.x = canvasWidth/2 - myatovichEvidence2.width/2;
-        myatovichEvidence2.y = canvasHeight/2 - myatovichEvidence2.height/2 - canvasHeight/7;
-        evidence2 = 1;
-        descriptionIsOpen = true;
+      if (!acquiredMyatovichEvidence2 || inventoryOpen) {
+        if (!fadingOut && !fadingIn && sceneID == 5 && myatovichDialogue == 2 && mouseUp) {
+          myatovichEvidence2.width = canvasWidth/5;
+          myatovichEvidence2.height = canvasHeight/5;
+          myatovichEvidence2.x = canvasWidth/2 - myatovichEvidence2.width/2;
+          myatovichEvidence2.y = canvasHeight/2 - myatovichEvidence2.height/2 - canvasHeight/7;
+          evidence2 = 1;
+          descriptionIsOpen = true;
+
+          mouseUp = false; //prevents this code block from executing again until the user releases the mouse button
+        }
+      }
+    }
+    if (descriptionBox7.clicked()) {
+      if (!fadingOut && !fadingIn && sceneID == 7 && evidence1 == 1 && mouseUp) {
+        /* Close description box and add evidence to inventory */
+        evidence1 = 0;
+        acquiredHillEvidence1 = true;
+        descriptionIsOpen = false;
+        
+        /* Move work schedule to inventory */
+        hillEvidence1.width = evidenceWidthSmall;
+        hillEvidence1.height = evidenceHeightSmall;
+        hillEvidence1.x = canvasWidth - 2.2*hillEvidence1.width;
+        hillEvidence1.y = canvasHeight/15 + 3.2*evidenceHeightSmall;
         
         mouseUp = false; //prevents this code block from executing again until the user releases the mouse button
       }
     }
-    if (choiceBox1.clicked() && !descriptionIsOpen) {
+    if (hillEvidence1.clicked() && !descriptionIsOpen) {
+      /* Show description of evidence */
+      if (!acquiredHillEvidence1 || inventoryOpen) {
+        if (!fadingOut && !fadingIn && sceneID == 7 && hillDialogue == 2 && mouseUp) {
+          hillEvidence1.width = canvasWidth/4;
+          hillEvidence1.height = canvasHeight/4;
+          hillEvidence1.x = canvasWidth/2 - hillEvidence1.width/2;
+          hillEvidence1.y = canvasHeight/2 - hillEvidence1.height/2 - canvasHeight/7;
+          evidence1 = 1;
+          descriptionIsOpen = true;
+
+          mouseUp = false; //prevents this code block from executing again until the user releases the mouse button
+        }
+      }
+    }
+    if (descriptionBox8.clicked()) {
+      if (!fadingOut && !fadingIn && sceneID == 7 && evidence2 == 1 && mouseUp) {
+        /* Close description box and add evidence to inventory */
+        evidence2 = 0;
+        acquiredHillEvidence2 = true;
+        descriptionIsOpen = false;
+        
+        /* Move journal to inventory */
+        hillEvidence2.width = evidenceHeightSmall;
+        hillEvidence2.height = evidenceHeightSmall;
+        hillEvidence2.x = canvasWidth - 1.2*hillEvidence2.width;
+        hillEvidence2.y = canvasHeight/15 + 3.2*evidenceHeightSmall;
+        
+        mouseUp = false; //prevents this code block from executing again until the user releases the mouse button
+      }
+    }
+    if (hillEvidence2.clicked() && !descriptionIsOpen) {
+      /* Show description of evidence */
+      if (!acquiredHillEvidence2 || inventoryOpen) {
+        if (!fadingOut && !fadingIn && sceneID == 7 && hillDialogue == 2 && mouseUp) {
+          hillEvidence2.width = canvasWidth/6;
+          hillEvidence2.height = canvasWidth/6;
+          hillEvidence2.x = canvasWidth/2 - hillEvidence2.width/2;
+          hillEvidence2.y = canvasHeight/2 - hillEvidence2.height/2 - canvasHeight/7;
+          evidence2 = 1;
+          descriptionIsOpen = true;
+
+          mouseUp = false; //prevents this code block from executing again until the user releases the mouse button
+        }
+      }
+    }
+    if (choiceBox1.clicked() && !descriptionIsOpen && !inventoryOpen) {
       /* Player selected first choice */
       if (!fadingOut && !fadingIn && sceneID == 3 && sheriffDialogue == 2 && mouseUp) {
         playerChoice = 1;
@@ -1181,7 +1337,7 @@ function updateGameArea() {
         mouseUp = false; //prevents this code block from executing again until the user releases the mouse button
       }
     }
-    if (choiceBox2.clicked() && !descriptionIsOpen) {
+    if (choiceBox2.clicked() && !descriptionIsOpen && !inventoryOpen) {
       /* Player selected second choice */
       if (!fadingOut && !fadingIn && sceneID == 3 && sheriffDialogue == 2 && mouseUp) {
         playerChoice = 2;
@@ -1190,7 +1346,7 @@ function updateGameArea() {
         mouseUp = false; //prevents this code block from executing again until the user releases the mouse button
       }
     }
-    if (choiceBox3.clicked() && !descriptionIsOpen) {
+    if (choiceBox3.clicked() && !descriptionIsOpen && !inventoryOpen) {
       /* Player selected third choice */
       if (!fadingOut && !fadingIn && sceneID == 3 && sheriffDialogue == 2 && mouseUp) {
         playerChoice = 3;
