@@ -20,6 +20,7 @@ var tonzilloDialogue = 1; //used for tracking what dialogue is being displayed
 var hillDialogue = 1; //used for tracking what dialogue is being displayed
 var evidence1 = 0; //used for tracking what evidence description is being displayed. Applies to one piece of evidence per scene.
 var evidence2 = 0; //used for tracking what evidence description is being displayed. Applies to one piece of evidence per scene.
+var playerChoice = 0; //used for checking if the player chose the correct supsect
 var mouseUp = true; //manual check for mouseup or touchend event
 var fadeAlpha = 0.0; // alpha value for fadeRect
 var fadingOut = false;
@@ -53,6 +54,9 @@ var mapIconHeight = .2*canvasHeight;
 var stationBackground;
 var sheriffText1;
 var sheriffText2;
+var sheriffText3;
+var sheriffText4;
+var sheriffText5;
 var returnToMapButton;
 var returnToMapButtonWidth = .2*canvasWidth;
 var returnToMapButtonHeight = .1*canvasHeight;
@@ -92,8 +96,21 @@ var tonzilloSuspect;
 var hillBackground;
 var hillText1;
 var hillSuspect;
-var suspectWidth = 210;
-var suspectHeight = 150;
+var suspectWidth = canvasWidth/4;
+var suspectHeight = canvasHeight/3;
+var choiceBox1;
+var choiceBox2;
+var choiceBox3;
+var choiceBoxWidth = canvasWidth - canvasWidth/4;
+var choiceBoxHeight = canvasHeight/5;
+var choiceBoxText1;
+var choiceBoxText2;
+var choiceBoxText3;
+var choiceSeparator1;
+var choiceSeparator2;
+var choiceMyatovichSuspect;
+var choiceTonzilloSuspect;
+var choiceHillSuspect;
 
 /* Gets called when page loads. Instantiate game components here. */
 function startGame() {
@@ -137,6 +154,26 @@ function startGame() {
   sheriffText1.text = "Sheriff:\nThank you for coming down so quickly, Detective, I regret to inform you,\nthere has been a murder.  A young couple from the Trenton area have been\nbrutally killed on Lover’s Lane down at Duck Island.\n\nIt’s your job to go down there and investigate what happened."
   sheriffText2 = new component("24px", "Arial", "white", canvasWidth/9, canvasHeight/2 + canvasHeight/4, "text");
   sheriffText2.text = "Sheriff:\nSo, detective, do you think you know who did it?";
+  choiceSeparator1 = new component(choiceBoxWidth, choiceBoxHeight/20, "black", canvasWidth/2 - choiceBoxWidth/2, 2*choiceBoxHeight - choiceBoxHeight/20);
+  choiceSeparator2 = new component(choiceBoxWidth, choiceBoxHeight/20, "black", canvasWidth/2 - choiceBoxWidth/2, 3*choiceBoxHeight - choiceBoxHeight/20);
+  choiceBox1 = new component(choiceBoxWidth, choiceBoxHeight, "assets/images/000000-0.5.png", canvasWidth/2 - choiceBoxWidth/2, choiceBoxHeight, "image");
+  choiceBoxText1 = new component("26px", "Arial", "white", canvasWidth/2, choiceBoxHeight + choiceBoxHeight/3, "text");
+  choiceBoxText1.text = "Mr. Myatovich";
+  choiceBox2 = new component(choiceBoxWidth, choiceBoxHeight, "assets/images/000000-0.5.png", canvasWidth/2 - choiceBoxWidth/2, 2*choiceBoxHeight, "image");
+  choiceBoxText2 = new component("26px", "Arial", "white", canvasWidth/2, 2*choiceBoxHeight + choiceBoxHeight/3, "text");
+  choiceBoxText2.text = "Mrs. Tonzillo";
+  choiceBox3 = new component(choiceBoxWidth, choiceBoxHeight, "assets/images/000000-0.5.png", canvasWidth/2 - choiceBoxWidth/2, 3*choiceBoxHeight, "image");
+  choiceBoxText3 = new component("26px", "Arial", "white", canvasWidth/2, 3*choiceBoxHeight + choiceBoxHeight/3, "text");
+  choiceBoxText3.text = "Mr. Hill";
+  sheriffText3 = new component("24px", "Arial", "white", canvasWidth/9, canvasHeight/2 + canvasHeight/4, "text");
+  sheriffText3.text = "Sheriff:\nNot a bad guess, however the evidence isn't strong enough to\nconfirm Mr. Myatovich as the murderer. The culprit was likely\nsomeone else.";
+  sheriffText4 = new component("24px", "Arial", "white", canvasWidth/9, canvasHeight/2 + canvasHeight/4, "text");
+  sheriffText4.text = "Sheriff:\nNot a bad guess, however the evidence isn't strong enough to\nconfirm Mrs. Tonzillo as the murderer. The culprit was likely\nsomeone else.";
+  sheriffText5 = new component("24px", "Arial", "white", canvasWidth/9, canvasHeight/2 + canvasHeight/4, "text");
+  sheriffText5.text = "Sheriff:\nGreat work Detective! The evidence you collected is solid proof\nthat Mr. Hill is the murderer. Now we will be able to arrest him\nfor his crimes.";
+  choiceMyatovichSuspect = new component(0.55*suspectWidth, 0.55*suspectHeight, "assets/images/suspectdad.png", canvasWidth/2 - choiceBoxWidth/3, 2*choiceBoxHeight - 0.55*suspectHeight, "image");
+  choiceTonzilloSuspect = new component(0.55*suspectWidth, 0.55*suspectHeight, "assets/images/suspectwife.png", canvasWidth/2 - choiceBoxWidth/3, 3*choiceBoxHeight - 0.55*suspectHeight, "image");
+  choiceHillSuspect = new component(0.55*suspectWidth, 0.55*suspectHeight, "assets/images/suspectkiller.png", canvasWidth/2 - choiceBoxWidth/3, 4*choiceBoxHeight - 0.55*suspectHeight, "image");
   
   /* Crime scene */
   crimeBackground = new component(canvasWidth, canvasHeight, "assets/images/duckisland.jpg", 0, 0, "image");
@@ -169,20 +206,20 @@ function startGame() {
   myatovichEvidence2 = new component(evidenceWidthSmall, evidenceHeightSmall, "assets/images/gloves.png", canvasWidth/2 + canvasWidth/4, canvasHeight/2 - canvasHeight/8, "image");
   myatovichEvidenceText2 = new component("24px", "Arial", "white", canvasWidth/6, canvasHeight/2 + canvasHeight/6, "text");
   myatovichEvidenceText2.text = "These are Mr. Myatovich’s leather gloves. They are about the\nsame size as the handprint found at the scene of the crime.";
-  myatovichText1 = new component("24px", "Arial", "white", canvasWidth/6, canvasHeight/2 + canvasHeight/4, "text");
+  myatovichText1 = new component("24px", "Arial", "white", canvasWidth/5, canvasHeight/2 + canvasHeight/4, "text");
   myatovichText1.text = "Mr. Myatovich:\nSure, I was upset, but I would never hurt my little girl.";
   myatovichSuspect = new component(suspectWidth, suspectHeight, "assets/images/suspectdad.png", 0, canvasHeight - suspectHeight, "image");
   
   /* Tonzillo suspect scene */
   tonzilloBackground = new component(canvasWidth, canvasHeight, "assets/images/room.jpg", 0, 0, "image");
-  tonzilloText1 = new component("24px", "Arial", "white", canvasWidth/6, canvasHeight/2 + canvasHeight/4, "text");
-  tonzilloText1.text = "Mrs. Tonzillo:\nI was shocked to find out Jim was cheating on me, especially because\nI’m pregnant with his child. But, I couldn’t have killed him, I’m not\nstrong enough nor do I have the stomach to deal with blood.";
+  tonzilloText1 = new component("24px", "Arial", "white", canvasWidth/5, canvasHeight/2 + canvasHeight/4, "text");
+  tonzilloText1.text = "Mrs. Tonzillo:\nI was shocked to find out Jim was cheating on me, especially\nbecause I’m pregnant with his child. But, I couldn’t have killed him,\nI’m not strong enough nor do I have the stomach to deal with blood.";
   tonzilloSuspect = new component(suspectWidth, suspectHeight, "assets/images/suspectwife.png", 0, canvasHeight - suspectHeight, "image");
   
   /* Hill suspect scene */
   hillBackground = new component(canvasWidth, canvasHeight, "assets/images/factory.jpg", 0, 0, "image");
-  hillText1 = new component("24px", "Arial", "white", canvasWidth/6, canvasHeight/2 + canvasHeight/4, "text");
-  hillText1.text = "Mr. Hill:\nYeah, I worked with Jim, he was a fine guy and all, he just\ntalked about himself mostly. But, I couldn’t have done\nthe murder, I was down at the factory when it happened.";
+  hillText1 = new component("24px", "Arial", "white", canvasWidth/5, canvasHeight/2 + canvasHeight/4, "text");
+  hillText1.text = "Mr. Hill:\nYeah, I worked with Jim, he was a fine guy and all,\nhe just talked about himself mostly. But, I couldn’t have done\nthe murder, I was down at the factory when it happened.";
   hillSuspect = new component(suspectWidth, suspectHeight, "assets/images/suspectkiller.png", 0, canvasHeight - suspectHeight, "image");
   
   myGameArea.start();
@@ -404,6 +441,48 @@ function drawScene3() {
         sheriffText2.update();
         break;
       case 2:
+        choiceBox1.newPos();
+        choiceBox1.update();
+        choiceMyatovichSuspect.newPos();
+        choiceMyatovichSuspect.update();
+        choiceBoxText1.newPos();
+        choiceBoxText1.update();
+        choiceBox2.newPos();
+        choiceBox2.update();
+        choiceTonzilloSuspect.newPos();
+        choiceTonzilloSuspect.update();
+        choiceBoxText2.newPos();
+        choiceBoxText2.update();
+        choiceBox3.newPos();
+        choiceBox3.update();
+        choiceHillSuspect.newPos();
+        choiceHillSuspect.update();
+        choiceBoxText3.newPos();
+        choiceBoxText3.update();
+        choiceSeparator1.newPos();
+        choiceSeparator1.update();
+        choiceSeparator2.newPos();
+        choiceSeparator2.update();
+        break;
+      case 3:
+        if (playerChoice == 1) {
+          dialogueBox.newPos();
+          dialogueBox.update();
+          sheriffText3.newPos();
+          sheriffText3.update();
+        }
+        else if (playerChoice == 2) {
+          dialogueBox.newPos();
+          dialogueBox.update();
+          sheriffText4.newPos();
+          sheriffText4.update();
+        }
+        else if (playerChoice == 3) {
+          dialogueBox.newPos();
+          dialogueBox.update();
+          sheriffText5.newPos();
+          sheriffText5.update();
+        }
         break;
     }
     
@@ -419,6 +498,7 @@ function drawScene3() {
     sheriffText1.newPos();
     sheriffText1.update();
   }
+  
   /* Draw returnToMapButton */
   if (displayReturn) {
     returnToMapButton.newPos();
@@ -777,18 +857,17 @@ function updateGameArea() {
         }
         break;
       case 3:
+        if (!descriptionIsOpen) {
+          displayReturn = true;
+        }
+        else {
+          displayReturn = false;
+        }
         if (sheriffDialogue > 1) {
-          displayMagnify = true;
-          if (!descriptionIsOpen) {
-            displayReturn = true;
-          }
-          else {
-            displayReturn = false;
-          }
+          displayMagnify = true;  
         }
         else {
           displayMagnify = false;
-          displayReturn = false;
         }
         break;
       case 4:
@@ -1089,6 +1168,33 @@ function updateGameArea() {
         myatovichEvidence2.y = canvasHeight/2 - myatovichEvidence2.height/2 - canvasHeight/7;
         evidence2 = 1;
         descriptionIsOpen = true;
+        
+        mouseUp = false; //prevents this code block from executing again until the user releases the mouse button
+      }
+    }
+    if (choiceBox1.clicked() && !descriptionIsOpen) {
+      /* Player selected first choice */
+      if (!fadingOut && !fadingIn && sceneID == 3 && sheriffDialogue == 2 && mouseUp) {
+        playerChoice = 1;
+        sheriffDialogue = 3;
+        
+        mouseUp = false; //prevents this code block from executing again until the user releases the mouse button
+      }
+    }
+    if (choiceBox2.clicked() && !descriptionIsOpen) {
+      /* Player selected second choice */
+      if (!fadingOut && !fadingIn && sceneID == 3 && sheriffDialogue == 2 && mouseUp) {
+        playerChoice = 2;
+        sheriffDialogue = 3;
+        
+        mouseUp = false; //prevents this code block from executing again until the user releases the mouse button
+      }
+    }
+    if (choiceBox3.clicked() && !descriptionIsOpen) {
+      /* Player selected third choice */
+      if (!fadingOut && !fadingIn && sceneID == 3 && sheriffDialogue == 2 && mouseUp) {
+        playerChoice = 3;
+        sheriffDialogue = 3;
         
         mouseUp = false; //prevents this code block from executing again until the user releases the mouse button
       }
