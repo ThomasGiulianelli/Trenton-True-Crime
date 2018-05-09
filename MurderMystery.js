@@ -1,6 +1,6 @@
 var canvasWidth = 1024; //16:9 resolution
 var canvasHeight = 576; //16:9 resolution
-var gameStates = Object.freeze({"intro":1, "sheriff_debrief":2, "visited_crimescene":3, "visited_suspects":4}); //game states enum
+var gameStates = Object.freeze({"intro":1, "sheriff_debrief":2, "visited_crimescene":3, "visited_suspects":4, "epilogue":5}); //game states enum
 var gameState = gameStates.intro; //used to keep track of player progress
 var sceneID = 0;
 var nextScene = 0;
@@ -127,6 +127,12 @@ var choiceSeparator2;
 var choiceMyatovichSuspect;
 var choiceTonzilloSuspect;
 var choiceHillSuspect;
+var epilogueBackground;
+var epilogueText1;
+var epilogueButton1;
+var epilogueButton2;
+var epilogueButtonWidth = 335;
+var epilogueButtonHeight = 43;
 
 /* Gets called when page loads. Instantiate game components here. */
 function startGame() {
@@ -253,6 +259,13 @@ function startGame() {
   hillText1 = new component("24px", "Arial", "white", canvasWidth/5, canvasHeight/2 + canvasHeight/4, "text");
   hillText1.text = "Mr. Hill:\nYeah, I worked with Jim, he was a fine guy and all,\nhe just talked about himself mostly. But, I couldn’t have done\nthe murder, I was down at the factory when it happened.";
   hillSuspect = new component(suspectWidth, suspectHeight, "assets/images/suspectkiller.png", 0, canvasHeight - suspectHeight, "image");
+  
+  /* Epilogue scene */
+  epilogueBackground = new component(canvasWidth, canvasHeight, "assets/images/black.jpg", 0, 0, "image");
+  epilogueText1 = new component("50px", "Arial", "white",  canvasWidth/9, canvasHeight/5, "text");
+  epilogueText1.text = "Epilogue";
+  epilogueButton1 = new component(epilogueButtonWidth, epilogueButtonHeight, "assets/images/button_read-article-about-the-murders.png", canvasWidth/2 - epilogueButtonWidth/2, canvasHeight/2 - canvasHeight/8, "image");
+  epilogueButton2 = new component(epilogueButtonWidth, epilogueButtonHeight, "assets/images/button_credits.png", canvasWidth/2 - epilogueButtonWidth/2, canvasHeight/2 + canvasHeight/8, "image");
   
   myGameArea.start();
 }
@@ -941,6 +954,18 @@ function drawScene7() {
   }
 }
 
+/* Epilogue scene */
+function drawScene8() {
+  epilogueBackground.newPos();
+  epilogueBackground.update();
+  epilogueText1.newPos();
+  epilogueText1.update();
+  epilogueButton1.newPos();
+  epilogueButton1.update();
+  //epilogueButton2.newPos();
+  //epilogueButton2.update();
+}
+
 function drawInventory() {
   inventory.newPos();
   inventory.update();
@@ -1005,7 +1030,7 @@ function updateGameArea() {
     mapState = 2;
   }
   
-  if (gameState > gameStates.intro) {
+  if (gameState > gameStates.intro && gameState != gameStates.epilogue) {
     switch(sceneID) {
       case 1:
         displayMagnify = false;
@@ -1096,6 +1121,10 @@ function updateGameArea() {
         break;
     }
   }
+  if (gameState == gameStates.epilogue) {
+    displayMagnify = false;
+    displayReturn = false;
+  }
   
   /* Check for user actions */
   if (myGameArea.mousePos.x && myGameArea.mousePos.y) {
@@ -1185,6 +1214,12 @@ function updateGameArea() {
         if (sheriffDialogue < 2) {
           sheriffDialogue++;
           mouseUp = false; //prevents this code block from executing again until the user releases the mouse button
+        }
+        else if (sheriffDialogue == 3) {
+          /* Fade to epilogue scene */
+          fadingOut = true;
+          nextScene = 8;
+          inventoryOpen = false;
         }
       }
       if (!fadingOut && !fadingIn && sceneID == 4 && mouseUp) {
@@ -1495,6 +1530,12 @@ function updateGameArea() {
         mouseUp = false; //prevents this code block from executing again until the user releases the mouse button
       }
     }
+    if (epilogueButton1.clicked()) {
+      /* Redirect to article */
+      if (!fadingOut && !fadingIn && sceneID == 8) {
+        window.location = "http://www.capitalcentury.com/1939.html";
+      }
+    }
   }
 
   /* Draw the current scene */
@@ -1614,6 +1655,19 @@ function updateGameArea() {
       }
       else if (fadingIn) {
         drawScene7();
+        fadeInScene();
+      }
+      break;
+      case 8: //epilogue scene
+      if (!fadingOut && !fadingIn) {
+        drawScene8();
+      }
+      else if (fadingOut) {
+        drawScene8();
+        fadeOutScene();
+      }
+      else if (fadingIn) {
+        drawScene8();
         fadeInScene();
       }
       break;
